@@ -29,11 +29,11 @@ void BlockType::calculateTexCoords() {
 	m_texCoords[0] = UV(frontW, frontH - TEX_HEIGHT);
 	m_texCoords[1] = UV(frontW, frontH);
 	m_texCoords[2] = UV(frontW + TEX_WIDTH, frontH);
-	
+
 	m_texCoords[3] = UV(frontW + TEX_WIDTH, frontH);
 	m_texCoords[4] = UV(frontW + TEX_WIDTH, frontH - TEX_HEIGHT);
 	m_texCoords[5] = UV(frontW, frontH - TEX_HEIGHT);
-	
+
 	// Back
 	float backW = TEX_WIDTH*m_backTex.x;
 	float backH = TEX_HEIGHT*m_backTex.y;
@@ -45,7 +45,7 @@ void BlockType::calculateTexCoords() {
 	m_texCoords[9] = UV(backW, backH - TEX_HEIGHT);
 	m_texCoords[10] = UV(backW + TEX_WIDTH, backH - TEX_HEIGHT);
 	m_texCoords[11] = UV(backW + TEX_WIDTH, backH);
-	
+
 	// Left
 	float leftW = TEX_WIDTH*m_leftTex.x;
 	float leftH = TEX_HEIGHT*m_leftTex.y;
@@ -53,11 +53,11 @@ void BlockType::calculateTexCoords() {
 	m_texCoords[12] = UV(leftW, leftH);
 	m_texCoords[13] = UV(leftW + TEX_WIDTH, leftH);
 	m_texCoords[14] = UV(leftW, leftH - TEX_HEIGHT);
-	 
+
 	m_texCoords[15] = UV(leftW + TEX_WIDTH, leftH);
 	m_texCoords[16] = UV(leftW + TEX_WIDTH, leftH - TEX_HEIGHT);
 	m_texCoords[17] = UV(leftW, leftH - TEX_HEIGHT);
-	
+
 	// Right
 	float rightW = TEX_WIDTH*m_rightTex.x;
 	float rightH = TEX_HEIGHT*m_rightTex.y;
@@ -89,7 +89,7 @@ void BlockType::calculateTexCoords() {
 	m_texCoords[30] = UV(botW, botH - TEX_HEIGHT);
 	m_texCoords[31] = UV(botW, botH);
 	m_texCoords[32] = UV(botW + TEX_WIDTH, botH);
-	
+
 	m_texCoords[33] = UV(botW + TEX_WIDTH, botH);
 	m_texCoords[34] = UV(botW, botH);
 	m_texCoords[35] = UV(botW, botH - TEX_HEIGHT);

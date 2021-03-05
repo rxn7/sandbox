@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "../Libs.h"
+#include "Libs.h"
 
 class Texture {
 public:

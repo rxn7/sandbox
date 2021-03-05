@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Libs.h"
+#include "Libs.h"
 
 class Transform {
 public:

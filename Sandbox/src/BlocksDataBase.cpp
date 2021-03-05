@@ -1,9 +1,6 @@
 #pragma once
 
 #include "BlockType.h"
-#define TYPE_GRASS 0
-#define TYPE_DIRT 1
-#define TYPE_COBBLESTONE 2
 
 namespace Vertices {
 	static const glm::vec3 blockVertices[36] = {
@@ -64,13 +61,15 @@ namespace Vertices {
 }
 
 namespace BlocksDB {
-	static const BlockType GRASS(true, UV(1, 0), UV(2, 0), UV(0, 0), UV(0, 0), UV(0, 0), UV(0, 0));
-	static const BlockType DIRT(true, UV(2, 0), UV(2, 0), UV(2, 0), UV(2, 0), UV(2, 0), UV(2, 0));
-	static const BlockType COBBLESTONE(true, UV(0, 1), UV(0, 1), UV(0, 1), UV(0, 1), UV(0, 1), UV(0, 1));
+	static const BlockType GRASS		(true, UV(1, 0), UV(2, 0), UV(0, 0), UV(0, 0), UV(0, 0), UV(0, 0));
+	static const BlockType DIRT			(true, UV(2, 0), UV(2, 0), UV(2, 0), UV(2, 0), UV(2, 0), UV(2, 0));
+	static const BlockType COBBLESTONE	(true, UV(0, 1), UV(0, 1), UV(0, 1), UV(0, 1), UV(0, 1), UV(0, 1));
+	static const BlockType STONE        (true, UV(1, 1), UV(1, 1), UV(1, 1), UV(1, 1), UV(1, 1), UV(1, 1));
 
 	static const BlockType BLOCK_TYPES[] = {
 		GRASS,
 		DIRT,
 		COBBLESTONE,
+		STONE,
 	};
 }
