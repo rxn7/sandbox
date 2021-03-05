@@ -1,22 +1,25 @@
 #pragma once
 
 #include "Libs.h"
-
-typedef unsigned int uint;
+#include "core/Uv.h"
 
 class BlockType {
 public:
-	BlockType(uint t, uint b, uint l, uint r, uint f, uint ba);
-	~BlockType();
+	BlockType(const bool isSolid, const UV& top, const UV& bot, const UV& left, const UV& right, const UV& front, const UV& back);
 
-private:
-	static uint topTex;
-	static uint bottomText;
-	static uint leftText;
-	static uint rightText;
-	static uint frontText;
-	static uint backText;
+public:
+	void calculateTexCoords();
+
+public:
+	bool m_isSolid;
+
+	UV m_topTex;
+	UV m_bottomTex;
+	UV m_leftTex;
+	UV m_rightTex;
+	UV m_frontTex;
+	UV m_backTex;
 	
-	static glm::vec2 texCoords[36];
+	UV m_texCoords[36]{};
 };
 

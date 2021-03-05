@@ -167,26 +167,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\Input.cpp" />
+    <ClCompile Include="src\BlocksDataBase.cpp" />
     <ClCompile Include="src\BlockType.cpp" />
     <ClCompile Include="src\Block.cpp" />
-    <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\core\Camera.cpp" />
+    <ClCompile Include="src\core\Mesh.cpp" />
+    <ClCompile Include="src\core\Shader.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
-    <ClCompile Include="src\Transform.cpp" />
+    <ClCompile Include="src\core\Texture.cpp" />
+    <ClCompile Include="src\core\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\Input.h" />
     <ClInclude Include="src\BlockType.h" />
     <ClInclude Include="src\Block.h" />
-    <ClInclude Include="src\Mesh.h" />
-    <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\core\Mesh.h" />
+    <ClInclude Include="src\core\Shader.h" />
+    <ClInclude Include="src\core\Camera.h" />
     <ClInclude Include="src\Libs.h" />
     <ClInclude Include="src\Main.h" />
-    <ClInclude Include="src\stb_image.h" />
-    <ClInclude Include="src\Texture.h" />
-    <ClInclude Include="src\Transform.h" />
+    <ClInclude Include="src\core\stb_image.h" />
+    <ClInclude Include="src\core\Texture.h" />
+    <ClInclude Include="src\core\Transform.h" />
+    <ClInclude Include="src\core\Uv.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,16 +1,37 @@
 ﻿#include "Libs.h"
 #include <iostream>
 #include "Main.h"
-#include "Camera.h"
-#include "Shader.h"
-#include "Mesh.h"
-#include "Texture.h"
-#include "Transform.h"
+#include "core/Camera.h"
+#include "core/Shader.h"
+#include "core/Mesh.h"
+#include "core/Texture.h"
+#include "core/Transform.h"
+#include "BlockType.h"
+#include "BlocksDataBase.cpp"
+#include "Block.h"
+#include "Libs.h"
+#include "core/Input.h"
+#include <vector>
 
 #define HEIGHT 720
 #define WIDTH 1280
 
 GLFWwindow* window;
+bool queueSpawn;
+
+void spawnBlock(const Shader& shader, const uint16_t& type, const glm::vec3& pos, std::vector<Mesh*>& vector) {
+	Vertex vertices[36];
+	Block block = Block(type);
+	
+	for (int i = 0; i<36; i++)
+		vertices[i] = Vertex(Vertices::blockVertices[i], BlocksDB::BLOCK_TYPES[type].m_texCoords[i]);
+
+	Mesh* m = new Mesh(shader, vertices, sizeof(vertices) / sizeof(vertices[0]));
+	
+	m->getTransform()->setPos(pos);
+
+	vector.push_back(m);
+}
 
 int main() {
 	if (!initGlfw() || !initGl()) {
@@ -18,82 +39,39 @@ int main() {
 		return -1;
 	}
 
-	Vertex vertices[] = {
-		// Front
-		Vertex(glm::vec3(-1,-1, -1),glm::vec2(0, 0)),               // bottom left
-		Vertex(glm::vec3(-1, 1, -1),glm::vec2(0, 1)),	             // top left
-		Vertex(glm::vec3( 1, 1, -1),glm::vec2(1.f/3.f, 1)),       // top right
-
-		Vertex(glm::vec3( 1, 1,-1),glm::vec2(1.f/3.f, 1)),       // top right
-		Vertex(glm::vec3( 1,-1,-1),glm::vec2(1.f/3.f, 0)),        // bottom right
-		Vertex(glm::vec3(-1,-1,-1),glm::vec2(0, 0)),               // bottom left
-
-		// Back
-		Vertex(glm::vec3( 1,  1,  1),glm::vec2(1.f/3.f, 1)),      // top right
-		Vertex(glm::vec3(-1,  1,  1),glm::vec2(0, 1)),	         // top left
-		Vertex(glm::vec3(-1, -1,  1),glm::vec2(0, 0)),              // bottom left
-
-		Vertex(glm::vec3(-1, -1,  1),glm::vec2(0, 0)),              // bottom left
-		Vertex(glm::vec3( 1, -1,  1),glm::vec2(1.f/3.f, 0)),       // bottom right
-		Vertex(glm::vec3( 1,  1,  1),glm::vec2(1.f/3.f, 1)),		 // top right
-
-		// Left
-		Vertex(glm::vec3(-1, 1, 1),  glm::vec2(0, 1)),	             // top left
-		Vertex(glm::vec3(-1, 1,-1),  glm::vec2(1.f/3.f, 1)),	         // top right
-		Vertex(glm::vec3(-1,-1, 1),	 glm::vec2(0,0)),				 // bottom left
-
-		Vertex(glm::vec3(-1, 1,-1),  glm::vec2(1.f/3.f, 1)),			 // top right
-		Vertex(glm::vec3(-1,-1,-1),  glm::vec2(1.f/3.f, 0)),			 // bottom right
-		Vertex(glm::vec3(-1,-1, 1),  glm::vec2(0, 0)),	             // bottom left
-
-		// Right
-		Vertex(glm::vec3(1, 1, -1),  glm::vec2(1.f/3.f, 1)),	         // top right
-		Vertex(glm::vec3(1, 1, 1),   glm::vec2(0, 1)),	             // top left
-		Vertex(glm::vec3(1,-1, 1),   glm::vec2(0, 0)),	             // bottom left
-
-		Vertex(glm::vec3(1, -1, 1),  glm::vec2(0, 0)),	             // bottom left
-		Vertex(glm::vec3(1, -1, -1), glm::vec2(1.f/3.f, 0)),	     // bottom right
-		Vertex(glm::vec3(1, 1, -1),  glm::vec2(1.f/3.f, 1)),	         // top right
-
-		// Top
-		Vertex(glm::vec3(-1, 1, -1), glm::vec2(1.f/3.f, 0)),	     // bottom left
-		Vertex(glm::vec3(-1, 1, 1),  glm::vec2(1.f/3.f, 1)),	         // top left
-		Vertex(glm::vec3(1,  1, 1),  glm::vec2(2.f/3.f, 1)),	         // top right
-
-		Vertex(glm::vec3(1, 1, 1),   glm::vec2(2.f/3.f, 1)),	         // top right
-		Vertex(glm::vec3(1, 1, -1),  glm::vec2(2.f/3.f, 0)),	         // bottom right
-		Vertex(glm::vec3(-1, 1, -1), glm::vec2(1.f/3.f, 0)),	     // bottom left
-
-		// Bottom
-		Vertex(glm::vec3(-1, -1, 1), glm::vec2(2.f/3.f, 0)),	     // bottom left
-		Vertex(glm::vec3(-1, -1, -1),glm::vec2(2.f/3.f, 1)),	     // top left
-		Vertex(glm::vec3(1, -1, -1), glm::vec2(1, 1)),				 // top right
-
-		Vertex(glm::vec3(1, -1, -1), glm::vec2(1, 1)),	             // top right
-		Vertex(glm::vec3(1, -1, 1),  glm::vec2(2.f/3.f, 1)),			 // bottom right
-		Vertex(glm::vec3(-1, -1, 1), glm::vec2(2.f/3.f, 0)),		 // bottom left
-	};
-
-	Camera camera(glm::vec3(0,0,-5), 70, (float)WIDTH/(float)HEIGHT, 0.01f, 100.0f);
-	Mesh triangle(vertices, sizeof(vertices)/sizeof(vertices[0]));
 	Shader shader("../res/shaders/defaultShader");
-	Texture texture("../res/textures/test.png");
-	Transform transform;
+	Camera camera(glm::vec3(0,0,-5), 70, (float)WIDTH/(float)HEIGHT, 0.01f, 100.0f);
+	Texture texture("../res/textures/test.png"); 
+	texture.bind(0);
+	std::vector<Mesh*> meshes;
+	
+	spawnBlock(shader, TYPE_COBBLESTONE, glm::vec3(0,0,0), meshes);
 
 	float dt = 0;
 	double lastFrame = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		float moveDt = dt*10;
 
-		transform.getRot().x += dt;
-		transform.getRot().y += dt;
-		transform.getRot().z += dt;
+		if (Input::getKey(GLFW_KEY_W)) camera.move(glm::vec3(0,0, moveDt));
+		if (Input::getKey(GLFW_KEY_S)) camera.move(glm::vec3(0,0,-moveDt));
+		if (Input::getKey(GLFW_KEY_A)) camera.move(glm::vec3(moveDt,0,0));
+		if (Input::getKey(GLFW_KEY_D)) camera.move(glm::vec3(-moveDt,0,0));
+		
+		if (Input::getPressedKey(GLFW_KEY_SPACE)) {
+			std::cout << "Spawning a cube" << std::endl;
+			spawnBlock(shader, TYPE_GRASS, camera.getPosition(), meshes);
+		}
 
-		shader.bind();
-		texture.bind(0);
-		shader.update(transform, camera);
-		triangle.draw();
+		if (queueSpawn) {
+			spawnBlock(shader, TYPE_GRASS, camera.getPosition(), meshes);
+			queueSpawn = false;
+		}
 
+		for (int m = 0; m<meshes.size(); m++)
+			meshes[m]->draw(camera);
+		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	
@@ -103,6 +81,9 @@ int main() {
 	}
 
 	glfwTerminate();
+
+	for (int m = 0; m<meshes.size(); m++)
+		delete meshes[m];
 }
 
 void windowSizeCallback(GLFWwindow* window, int width, int height) {
@@ -122,6 +103,7 @@ bool initGlfw() {
 	}
 
 	glfwSetWindowSizeCallback(window, windowSizeCallback);
+	glfwSetKeyCallback(window, keyCallback);
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
@@ -141,9 +123,22 @@ bool initGl() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glClearColor(0, 0.2f, 1, 1);
+	glClearColor(0.53f, 0.8f, 0.92f, 1);
 	
 	glViewport(0, 0, WIDTH, HEIGHT);
 
 	return true;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		Input::setKey(key, true);
+
+		if (key == GLFW_KEY_SPACE)
+			queueSpawn = true;
+	}
+
+	else if (action == GLFW_RELEASE) {
+		Input::setKey(key, false);
+	}
 }
