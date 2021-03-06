@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "stb_image.h"
+#include "../stb_image.h"
 #include <iostream>
 
 Texture::Texture(const std::string& fileName) {
@@ -22,10 +22,7 @@ Texture::Texture(const std::string& fileName) {
 	stbi_image_free(imgData);
 }
 
-void Texture::bind(unsigned int unit) {
-	assert(unit >= 0 && unit <= 31);
-
-	glActiveTexture(GL_TEXTURE0 + unit);
+void Texture::bind() {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }
 

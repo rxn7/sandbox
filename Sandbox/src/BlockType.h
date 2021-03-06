@@ -1,25 +1,26 @@
 #pragma once
 
 #include "core/Libs.h"
-#include "core/Uv.h"
+#include <string>
 
 class BlockType {
 public:
-	BlockType(const bool isSolid, const UV& top, const UV& bot, const UV& left, const UV& right, const UV& front, const UV& back);
+	BlockType(const std::string name, const bool isSolid, const glm::vec2& top=glm::vec2(), const glm::vec2& bot = glm::vec2(), const glm::vec2& left = glm::vec2(), const glm::vec2& right = glm::vec2(), const glm::vec2& front = glm::vec2(), const glm::vec2& back = glm::vec2());
 
 public:
-	void calculateTexCoords();
+	inline std::string getName() const { return m_name;  }
+	inline bool isTranslucent() const { return !m_isSolid; }
 
-public:
+private:
+	std::string m_name;
 	bool m_isSolid;
 
-	UV m_topTex;
-	UV m_bottomTex;
-	UV m_leftTex;
-	UV m_rightTex;
-	UV m_frontTex;
-	UV m_backTex;
-	
-	UV m_texCoords[36]{};
+public:
+	glm::vec2 m_topTex;
+	glm::vec2 m_bottomTex;
+	glm::vec2 m_leftTex;
+	glm::vec2 m_rightTex;
+	glm::vec2 m_frontTex;
+	glm::vec2 m_backTex;
 };
 

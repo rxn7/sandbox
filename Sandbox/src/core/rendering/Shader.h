@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include "Libs.h"
-#include "Transform.h"
+#include "../Libs.h"
+#include "../Transform.h"
 #include "Camera.h"
 
 class Shader {

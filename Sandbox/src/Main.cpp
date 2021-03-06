@@ -3,108 +3,172 @@
 
 #include "core/Libs.h"
 
-#include "core/Camera.h"
-#include "core/Shader.h"
-#include "core/Mesh.h"
-#include "core/Texture.h"
+#include "core/rendering/Camera.h"
+#include "core/rendering/Shader.h"
+#include "core/rendering/Mesh.h"
+#include "core/rendering/Texture.h"
 #include "core/Transform.h"
 #include "core/Input.h"
+#include "core/imgui/imgui.h"
+#include "core/imgui/imgui_impl_glfw.h"
+#include "core/imgui/imgui_impl_opengl3.h"
 
-
-#include "BlocksDataBase.cpp"
+#include "BlocksContainer.cpp"
 #include "Block.h"
 #include "BlockType.h"
 #include "Main.h"
+#include "Chunk.h"
+#include "World.h"
 
 #define HEIGHT 720
 #define WIDTH 1280
 
-GLFWwindow* window;
-bool queueSpawn;
-uint16_t* p_selectedBlock;
+#define SENSITIVITY 0.1f
 
-void spawnBlock(const Shader& shader, const uint16_t& type, const glm::vec3& pos, std::vector<Mesh*>& vector) {
-	Vertex vertices[36];
-	Block block = Block(type);
-	
-	for (int i = 0; i<36; i++)
-		vertices[i] = Vertex(Vertices::blockVertices[i], BlocksDB::BLOCK_TYPES[type].m_texCoords[i]);
+bool showDebug=true;
+bool showCursor = false;
 
-	Mesh* m = new Mesh(shader, vertices, sizeof(vertices) / sizeof(vertices[0]));
-	
-	m->getTransform()->setPos(pos);
-	m->getTransform()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+float entityRotation, entityMovement;
+float moveSpeed=10;
+float dt;
+double lastMouseX=0, lastMouseY=0;
 
-	vector.push_back(m);
-}
+GLFWwindow* p_window;
+Shader* p_shader;
+Camera* p_camera;
+World* p_world;
 
 int main() {
+	srand(time(NULL));
+
 	if (!initGlfw() || !initGl() || !initImGui()) {
 		std::cerr << "Error has occured during initialisation" << std::endl;
 		return -1;
 	}
 
-	uint16_t currentType = 0;
-	p_selectedBlock = &currentType;
 	Shader shader("res/shaders/defaultShader");
-	Camera camera(glm::vec3(0,1,-5), 70, (float)WIDTH/(float)HEIGHT, 0.01f, 100.0f);
-	Texture texture("res/textures/test.png"); 
-	texture.bind(0);
-	std::vector<Mesh*> meshes;
+	p_shader = &shader;
 	
-	spawnBlock(shader, currentType, glm::vec3(0,0,0), meshes);
+	Camera camera(glm::vec3(0,20,-5), 70, (float)WIDTH/(float)HEIGHT, 0.01f, 100.0f);
+	p_camera = &camera;
+	
+	Texture texture("res/textures/test.png"); 
+	texture.bind();
 
-	float entityMovement=0;
-	float entityRotation = 0;
-	float dt = 0;
-	double lastFrame = glfwGetTime();
-	glm::vec3 moveDir(0,0,0);
-	while (!glfwWindowShouldClose(window)) {
+	World world;
+	p_world = &world;
+
+	float now=0, lastFrame=0;
+	while (!glfwWindowShouldClose(p_window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		moveDir = glm::vec3(0,0,0);
-		float moveDt = dt*10;
-		
-		if (Input::getKey(GLFW_KEY_W)) moveDir.z += 1;
-		if (Input::getKey(GLFW_KEY_S)) moveDir.z -= 1;
-		if (Input::getKey(GLFW_KEY_A)) moveDir.x += 1;
-		if (Input::getKey(GLFW_KEY_D)) moveDir.x -= 1;
+		update();
+		draw();
 
-		camera.move(moveDir * moveDt);
-		
-		if (queueSpawn) {
-			spawnBlock(shader, currentType, camera.getPosition(), meshes);
-			queueSpawn = false;
-		}
-
-		for (int m = 0; m<meshes.size(); m++) {
-			meshes[m]->draw(camera);
-			meshes[m]->getTransform()->getPos().y = sinf(entityMovement)/5;
-			
-			meshes[m]->getTransform()->getRot().y = entityRotation;
-			meshes[m]->getTransform()->getRot().x = entityRotation;
-			meshes[m]->getTransform()->getRot().z = entityRotation;
-		}
-		
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(p_window);
 		glfwPollEvents();
-	
-		double now = glfwGetTime();
+		
+		now = glfwGetTime();
 		dt = now - lastFrame;
 		lastFrame = now;
-
-		entityMovement += dt * 2;
-		entityRotation += dt;
 	}
 
 	glfwTerminate();
+}
 
-	for (int m = 0; m<meshes.size(); m++)
-		delete meshes[m];
+void draw() {
+	p_world->draw(*p_shader, *p_camera);
+	drawImGui();
+}
+
+void update() {
+	glfwSetInputMode(p_window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+
+	glm::vec3 moveDir(0, 0, 0);
+	float rot = 0, moveAmount = dt*moveSpeed;
+
+	if (Input::getKey(GLFW_KEY_W)) moveDir += p_camera->getForward();
+	if (Input::getKey(GLFW_KEY_S)) moveDir -= p_camera->getForward();
+	if (Input::getKey(GLFW_KEY_A)) moveDir += p_camera->getLeft();
+	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
+	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
+	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= glm::vec3(0, 1, 0);
+
+	p_camera->move(moveDir * moveAmount);
+	
+	entityMovement += dt * 2;
+	entityRotation += dt;
+}
+
+void drawImGui() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	if (showDebug) {
+		ImGui::Begin("Debug");
+
+		if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+			
+			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
+			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_camera->getForward().x, p_camera->getForward().y, p_camera->getForward().z);
+			ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
+			
+			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Text("Fps: %.4g", 1.0f/dt);
+				ImGui::Text("Frame delta: %f", dt);
+				//ImGui::Text("Chunks count: %u", p_chunks->size());
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Variables", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::DragFloat("Move Speed", &moveSpeed, 1, 1, 100);
+		}
+
+		ImGui::End();
+	}
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void windowSizeCallback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
+	p_camera->recalculatePerspective(width, height);
+}
+
+void mouseCallback(GLFWwindow* window, double x, double y) {
+	float xOffset = x - lastMouseX;
+	float yOffset = lastMouseY - y;
+
+	lastMouseX = x;
+	lastMouseY = y;
+
+	if (glfwGetInputMode(p_window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED)
+		return;
+
+	xOffset *= SENSITIVITY;
+	yOffset *= SENSITIVITY;
+
+	p_camera->rotate(xOffset, yOffset);
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		Input::setKey(key, true);
+
+		switch (key) {
+		case GLFW_KEY_ESCAPE:
+			showCursor = !showCursor;
+			break;
+
+		case GLFW_KEY_TAB:
+			showDebug = !showDebug;
+			break;
+		}
+	} else if (action == GLFW_RELEASE) {
+		Input::setKey(key, false);
+	}
 }
 
 bool initGlfw() {
@@ -113,17 +177,19 @@ bool initGlfw() {
 		return false;
 	}
 
-	window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", NULL, NULL);
-	if (!window) {
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", NULL, NULL);
+	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
 	}
+	
+	glfwGetCursorPos(p_window, &lastMouseX, &lastMouseY);
 
-	glfwSetWindowSizeCallback(window, windowSizeCallback);
-	glfwSetKeyCallback(window, keyCallback);
+	glfwSetCursorPosCallback(p_window, mouseCallback);
+	glfwSetWindowSizeCallback(p_window, windowSizeCallback);
+	glfwSetKeyCallback(p_window, keyCallback);
 
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	glfwMakeContextCurrent(p_window);
 
 	return true;
 }
@@ -133,7 +199,7 @@ bool initGl() {
 		std::cerr << "Couldn't initialize the GLEW." << std::endl;
 		return false;
 	}
-
+	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	
@@ -143,40 +209,23 @@ bool initGl() {
 	glClearColor(0.53f, 0.8f, 0.92f, 1);
 	
 	glViewport(0, 0, WIDTH, HEIGHT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
 	return true;
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS) {
-		Input::setKey(key, true);
-
-		switch (key) {
-		case GLFW_KEY_SPACE:
-			queueSpawn = true;
-			break;
-		
-		case GLFW_KEY_1:
-			*p_selectedBlock = 0;
-			break;
-
-		case GLFW_KEY_2:
-			*p_selectedBlock = 1;
-			break;
-
-		case GLFW_KEY_3:
-			*p_selectedBlock = 2;
-			break;
-
-		case GLFW_KEY_4:
-			*p_selectedBlock = 3;
-			break;
-		}
-	} else if (action == GLFW_RELEASE) {
-		Input::setKey(key, false);
-	}
-}
-
 bool initImGui() {
+	if (!IMGUI_CHECKVERSION())
+		return false;
+
+	auto context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(context);
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	ImGui_ImplGlfw_InitForOpenGL(p_window, true);
+	ImGui_ImplOpenGL3_Init("#version 130");
+
 	return true;
 }

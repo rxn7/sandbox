@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Libs.h"
+#include "../Libs.h"
 
 class Texture {
 public:
@@ -8,7 +8,7 @@ public:
 	virtual ~Texture();
 	
 public:
-	void bind(unsigned int unit);
+	void bind();
 
 private:
 	GLuint m_texture = 0;

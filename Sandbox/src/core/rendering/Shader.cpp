@@ -1,8 +1,8 @@
-#include "Libs.h"
+#include "../Libs.h"
 #include "Shader.h"
 #include <fstream>
 #include <iostream>
-#include "Transform.h"
+#include "../Transform.h"
 #include "Camera.h"
 
 static void checkShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
@@ -21,7 +21,7 @@ Shader::Shader(const std::string& fileName) {
 
 	glBindAttribLocation(m_program, 0, "position");
 	glBindAttribLocation(m_program, 1, "texCoord");
-
+	
 	glLinkProgram(m_program);
 	checkShaderError(m_program, GL_LINK_STATUS, true, "Program linking failed");
 	
@@ -46,7 +46,6 @@ void Shader::bind() {
 
 void Shader::update(const Transform& transform, const Camera& camera) {
 	glm::mat4 matrix = camera.getViewProjection() * transform.getMatrix();
-
 	glUniformMatrix4fv(m_uniforms[TRANSFORM_U], 1, GL_FALSE, &matrix[0][0]);
 }
 

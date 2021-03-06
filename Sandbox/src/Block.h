@@ -1,17 +1,17 @@
 #pragma once
 
-#include <cstdint>
 #include "BlockType.h"
+#include "BlocksContainer.cpp"
 
-class Block {
+struct Block {
 public:
 	Block() {}
-	Block(const uint16_t& type);
-
+	Block(uint16_t type);
 public:
-	void setType(const uint16_t& type);
-	inline uint16_t getType() { return m_type; }
+	void setType(uint16_t type);
+	inline BlockType getType() { return Blocks::BLOCK_TYPES[type]; }
+	glm::vec2 getTexture(uint8_t face);
 
 private:
-	uint16_t m_type{};
+	uint16_t type = 0;
 };

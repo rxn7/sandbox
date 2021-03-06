@@ -167,30 +167,50 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\core\imgui\imgui.cpp" />
+    <ClCompile Include="src\core\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\core\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\core\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\core\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\core\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\core\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\core\Input.cpp" />
-    <ClCompile Include="src\BlocksDataBase.cpp" />
+    <ClCompile Include="src\BlocksContainer.cpp" />
     <ClCompile Include="src\BlockType.cpp" />
     <ClCompile Include="src\Block.cpp" />
-    <ClCompile Include="src\core\Camera.cpp" />
-    <ClCompile Include="src\core\Mesh.cpp" />
-    <ClCompile Include="src\core\Shader.cpp" />
+    <ClCompile Include="src\core\rendering\Camera.cpp" />
+    <ClCompile Include="src\core\rendering\Mesh.cpp" />
+    <ClCompile Include="src\core\rendering\Shader.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\core\Texture.cpp" />
+    <ClCompile Include="src\core\rendering\Texture.cpp" />
     <ClCompile Include="src\core\Transform.cpp" />
+    <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ChunkCoord.h" />
+    <ClInclude Include="src\Chunk.h" />
+    <ClInclude Include="src\core\Definitions.h" />
+    <ClInclude Include="src\core\imgui\imconfig.h" />
+    <ClInclude Include="src\core\imgui\imgui.h" />
+    <ClInclude Include="src\core\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\core\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\core\imgui\imgui_internal.h" />
+    <ClInclude Include="src\core\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\core\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\core\imgui\imstb_truetype.h" />
     <ClInclude Include="src\core\Input.h" />
     <ClInclude Include="src\BlockType.h" />
     <ClInclude Include="src\Block.h" />
-    <ClInclude Include="src\core\Mesh.h" />
-    <ClInclude Include="src\core\Shader.h" />
-    <ClInclude Include="src\core\Camera.h" />
+    <ClInclude Include="src\core\rendering\Mesh.h" />
+    <ClInclude Include="src\core\rendering\Shader.h" />
+    <ClInclude Include="src\core\rendering\Camera.h" />
     <ClInclude Include="src\core\Libs.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\core\stb_image.h" />
-    <ClInclude Include="src\core\Texture.h" />
+    <ClInclude Include="src\core\rendering\Texture.h" />
     <ClInclude Include="src\core\Transform.h" />
-    <ClInclude Include="src\core\Uv.h" />
+    <ClInclude Include="src\World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
