@@ -6,7 +6,7 @@ The code is probably dogshit because I started learning c++ 3 days before starti
 
 ## Features
 ### Texture Packs
-You can create your own texture pack. You just need to put in res/textures folder. It should appear in the textures drop down (see the image below) and you can choose it.
+You can create your own texture pack. You just need to put it in res/textures folder. It should appear in the textures drop down (see the image below) and you can choose it.
 <br><br>
 ![ss3](https://user-images.githubusercontent.com/60551555/110389594-080c2d00-8065-11eb-8ffd-fe63874f330c.png)
 ![ss4](https://user-images.githubusercontent.com/60551555/110389606-0cd0e100-8065-11eb-9192-95e730c39416.png)
