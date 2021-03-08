@@ -1,21 +1,27 @@
 #include "Chunk.h"
 #include "core/Definitions.h"
 #include "BlocksContainer.cpp"
-#include "core/rendering/Shader.h"
+#include "core/render/Shader.h"
 #include <iostream>
 
 Chunk::Chunk(ChunkCoord coord) {
 	m_coord = coord;
+	generateTerrain();
+	update();
+	createMesh();
+}
 
-	// Generate terrain
+void Chunk::generateTerrain() {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
-			int y = rand() % 10 + 5;
-  			m_map[x][y][z].setType(rand() % 4 + 1);
+			int y = rand() & 10 + 5;
+			uint16_t blockType = rand() % 7;
+			m_map[x][y][z].setType(blockType);
 		}
 	}
+}
 
-	// Update mesh data
+void Chunk::update() {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int y = 0; y<CHUNK_HEIGHT; y++) {
 			for (int z = 0; z<CHUNK_WIDTH; z++) {
@@ -23,8 +29,6 @@ Chunk::Chunk(ChunkCoord coord) {
 			}
 		}
 	}
-	
-	createMesh();
 }
 
 void Chunk::draw(Shader& shader, const Camera& camera) {
@@ -35,12 +39,21 @@ void Chunk::draw(Shader& shader, const Camera& camera) {
 BlockType Chunk::getVoxel(const glm::i16vec3& pos) {
 	if (pos.x < 0 || pos.x > CHUNK_WIDTH-1 ||
 		pos.y < 0 || pos.y > CHUNK_HEIGHT-1 ||
-		pos.z < 0 || pos.z > CHUNK_WIDTH-1)
-	{
+		pos.z < 0 || pos.z > CHUNK_WIDTH-1) {
 		return Blocks::BLOCK_TYPES[TYPE_AIR];
 	}
 
 	return m_map[pos.x][pos.y][pos.z].getType();
+}
+
+uint16_t Chunk::getVoxelID(const glm::i16vec3& pos) {
+	if (pos.x < 0 || pos.x >= CHUNK_WIDTH ||
+		pos.y < 0 || pos.y >= CHUNK_HEIGHT ||
+		pos.z < 0 || pos.z >= CHUNK_WIDTH) {
+		return TYPE_AIR;
+	}
+
+	return m_map[pos.x][pos.y][pos.z].getTypeID();
 }
 
 Chunk::~Chunk() {
@@ -55,17 +68,15 @@ void Chunk::clearMeshData() {
 }
 
 void Chunk::updateMeshData(const glm::i16vec3& pos) {
-	if (getVoxel(pos).isTranslucent()) return;
+	if (getVoxelID(pos) == TYPE_AIR) return;
 	
-	for (int f = 0; f<6; f++) { // Each block has 6 faces
-		if (getVoxel(pos + FACES[f]).isTranslucent()) {
+	for (uint8_t f = 0; f<6; f++) { /* Each block has 6 faces */
+		if (getVoxel(pos + FACES[f]).renderNeighbours()) {
 			Block& block = m_map[pos.x][pos.y][pos.z];
 
-			for (int i = 0; i<4; i++) {	// Each face has 4 vertices
+			for (int i = 0; i<4; i++) {	/* Each face has 4 vertices */
 				m_vertices.push_back(pos + VERTICES[TRIANGLES[f][i]]);
 			}
-
-			addTexture(block.getTexture(f));
 
 			m_triangles.push_back(m_vertexIndex);
 			m_triangles.push_back(m_vertexIndex+1);
@@ -73,6 +84,8 @@ void Chunk::updateMeshData(const glm::i16vec3& pos) {
 			m_triangles.push_back(m_vertexIndex+2);
 			m_triangles.push_back(m_vertexIndex+1);
 			m_triangles.push_back(m_vertexIndex+3);
+
+			addTexture(block.getTexture(f));
 
 			m_vertexIndex += 4;
 		}
@@ -82,7 +95,7 @@ void Chunk::updateMeshData(const glm::i16vec3& pos) {
 void Chunk::createMesh() {
 	std::vector<Vertex> vertices;
 
-	for (int i = 0; i<m_vertices.size(); i++) {
+	for (size_t i = 0; i<m_vertices.size(); i++) {
 		vertices.push_back(Vertex(m_vertices[i], m_texCoords[i]));
 	}
 

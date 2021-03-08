@@ -72,23 +72,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)</IntDir>
+    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)bin-int\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
-    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)</IntDir>
+    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)bin-int\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -118,6 +118,8 @@
       <AdditionalIncludeDirectories>$(SolutionDir)lib/glfw/include;$(SolutionDir)lib/glew/include;$(SolutionDir)lib/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,6 +158,8 @@
       <AdditionalIncludeDirectories>$(SolutionDir)lib/glfw/include;$(SolutionDir)lib/glew/include;$(SolutionDir)lib/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -179,11 +183,11 @@
     <ClCompile Include="src\BlocksContainer.cpp" />
     <ClCompile Include="src\BlockType.cpp" />
     <ClCompile Include="src\Block.cpp" />
-    <ClCompile Include="src\core\rendering\Camera.cpp" />
-    <ClCompile Include="src\core\rendering\Mesh.cpp" />
-    <ClCompile Include="src\core\rendering\Shader.cpp" />
+    <ClCompile Include="src\core\render\Camera.cpp" />
+    <ClCompile Include="src\core\render\Mesh.cpp" />
+    <ClCompile Include="src\core\render\Shader.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\core\rendering\Texture.cpp" />
+    <ClCompile Include="src\core\render\Texture.cpp" />
     <ClCompile Include="src\core\Transform.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
@@ -202,13 +206,13 @@
     <ClInclude Include="src\core\Input.h" />
     <ClInclude Include="src\BlockType.h" />
     <ClInclude Include="src\Block.h" />
-    <ClInclude Include="src\core\rendering\Mesh.h" />
-    <ClInclude Include="src\core\rendering\Shader.h" />
-    <ClInclude Include="src\core\rendering\Camera.h" />
+    <ClInclude Include="src\core\render\Mesh.h" />
+    <ClInclude Include="src\core\render\Shader.h" />
+    <ClInclude Include="src\core\render\Camera.h" />
     <ClInclude Include="src\core\Libs.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\core\stb_image.h" />
-    <ClInclude Include="src\core\rendering\Texture.h" />
+    <ClInclude Include="src\core\render\Texture.h" />
     <ClInclude Include="src\core\Transform.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>

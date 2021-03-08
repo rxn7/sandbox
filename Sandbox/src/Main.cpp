@@ -1,12 +1,13 @@
 ﻿#include <vector>
 #include <iostream>
+#include <filesystem>
 
 #include "core/Libs.h"
 
-#include "core/rendering/Camera.h"
-#include "core/rendering/Shader.h"
-#include "core/rendering/Mesh.h"
-#include "core/rendering/Texture.h"
+#include "core/render/Camera.h"
+#include "core/render/Shader.h"
+#include "core/render/Mesh.h"
+#include "core/render/Texture.h"
 #include "core/Transform.h"
 #include "core/Input.h"
 #include "core/imgui/imgui.h"
@@ -20,15 +21,18 @@
 #include "Chunk.h"
 #include "World.h"
 
-#define HEIGHT 720
-#define WIDTH 1280
-
+#define HEIGHT 1080
+#define WIDTH 1920
 #define SENSITIVITY 0.1f
+#define MOVE_SPEED 10
+
+int width= WIDTH, height= HEIGHT;
+
+int selectedShader;
 
 bool showDebug=true;
 bool showCursor = false;
 
-float entityRotation, entityMovement;
 float moveSpeed=10;
 float dt;
 double lastMouseX=0, lastMouseY=0;
@@ -37,28 +41,18 @@ GLFWwindow* p_window;
 Shader* p_shader;
 Camera* p_camera;
 World* p_world;
+Texture* p_tex;
+
+std::vector<std::string> texturePacks;
 
 int main() {
-	srand(time(NULL));
-
-	if (!initGlfw() || !initGl() || !initImGui()) {
-		std::cerr << "Error has occured during initialisation" << std::endl;
+	if (!init()) {
+		clear();
 		return -1;
 	}
 
-	Shader shader("res/shaders/defaultShader");
-	p_shader = &shader;
-	
-	Camera camera(glm::vec3(0,20,-5), 70, (float)WIDTH/(float)HEIGHT, 0.01f, 100.0f);
-	p_camera = &camera;
-	
-	Texture texture("res/textures/test.png"); 
-	texture.bind();
-
-	World world;
-	p_world = &world;
-
 	float now=0, lastFrame=0;
+	/*Main loop*/
 	while (!glfwWindowShouldClose(p_window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
@@ -68,12 +62,13 @@ int main() {
 		glfwSwapBuffers(p_window);
 		glfwPollEvents();
 		
-		now = glfwGetTime();
+		/* Calculate delta between frames*/
+		now = (float)glfwGetTime();
 		dt = now - lastFrame;
 		lastFrame = now;
 	}
-
-	glfwTerminate();
+	
+	clear();
 }
 
 void draw() {
@@ -85,19 +80,17 @@ void update() {
 	glfwSetInputMode(p_window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
 	glm::vec3 moveDir(0, 0, 0);
-	float rot = 0, moveAmount = dt*moveSpeed;
-
-	if (Input::getKey(GLFW_KEY_W)) moveDir += p_camera->getForward();
-	if (Input::getKey(GLFW_KEY_S)) moveDir -= p_camera->getForward();
+	glm::vec3 forward = glm::normalize(glm::vec3(p_camera->getForward().x, 0, p_camera->getForward().z));
+	if (Input::getKey(GLFW_KEY_W)) moveDir += forward;
+	if (Input::getKey(GLFW_KEY_S)) moveDir -= forward;
 	if (Input::getKey(GLFW_KEY_A)) moveDir += p_camera->getLeft();
 	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
 	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
 	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= glm::vec3(0, 1, 0);
+	moveSpeed = Input::getKey(GLFW_KEY_LEFT_CONTROL) ? MOVE_SPEED * 1.5f : MOVE_SPEED;
 
-	p_camera->move(moveDir * moveAmount);
-	
-	entityMovement += dt * 2;
-	entityRotation += dt;
+	p_camera->move(moveDir * dt * moveSpeed);
+	p_camera->update();
 }
 
 void drawImGui() {
@@ -105,26 +98,69 @@ void drawImGui() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	/*Debug*/
 	if (showDebug) {
 		ImGui::Begin("Debug");
-
+		/*Stats*/
 		if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
-			
-			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
-			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_camera->getForward().x, p_camera->getForward().y, p_camera->getForward().z);
-			ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
-			
 			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Text("Fps: %.4g", 1.0f/dt);
 				ImGui::Text("Frame delta: %f", dt);
-				//ImGui::Text("Chunks count: %u", p_chunks->size());
+			}
+						
+			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
+			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_camera->getForward().x, p_camera->getForward().y, p_camera->getForward().z);
+    		ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
+		}
+		 
+		/*Settings*/
+		if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 100, "%.0f", 1);
+
+			if (ImGui::SliderFloat("Camera Fov", &p_camera->m_fov, 1, 179, "%.0f", 1)) {
+				p_camera->recalculatePerspective(width, height);
+			}
+
+			/*Shaders*/
+			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
+				if (ImGui::Selectable("Default")) {
+					delete p_shader;
+					p_shader = new Shader("res/shaders/defaultShader");
+				} else if (ImGui::Selectable("Transparent")) {
+					delete p_shader;
+					p_shader = new Shader("res/shaders/transparentShader");
+				} else if (ImGui::Selectable("Inverted colors")) {
+					delete p_shader;
+					p_shader = new Shader("res/shaders/invertedShader");
+				}
+				ImGui::EndCombo();
+			}
+			
+			/*Texture Packs*/
+			if (ImGui::BeginCombo("Texture", "Choose Texture")) {
+				for (unsigned int i = 0; i<texturePacks.size(); i++) {
+					std::string name  = texturePacks[i].substr(texturePacks[i].find_last_of("/\\") + 1);
+					if (ImGui::Selectable(name.c_str())) {
+						delete p_tex;
+						p_tex = new Texture(texturePacks[i]);
+						p_tex->bind();
+					}
+				}
+				ImGui::EndCombo();
 			}
 		}
 
-		if (ImGui::CollapsingHeader("Variables", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::DragFloat("Move Speed", &moveSpeed, 1, 1, 100);
-		}
+		/*Generate World*/
+		if (ImGui::Button("Generate World")) {
+			/*Delete all generated chunks before genereting new ones*/
+			for (int i = 0; i<p_world->m_chunks.size(); i++) {
+				delete p_world->m_chunks[i];
+			}
 
+			p_world->m_chunks.clear();
+			p_world->generate();
+		}
+		
 		ImGui::End();
 	}
 
@@ -132,14 +168,17 @@ void drawImGui() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void windowSizeCallback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-	p_camera->recalculatePerspective(width, height);
+void windowSizeCallback(GLFWwindow* window, int w, int h) {
+	width = w;
+	height = h;
+
+	glViewport(0, 0, w, h);
+	p_camera->recalculatePerspective(w, h);
 }
 
 void mouseCallback(GLFWwindow* window, double x, double y) {
-	float xOffset = x - lastMouseX;
-	float yOffset = lastMouseY - y;
+	double xOffset = x - lastMouseX;
+	double yOffset = lastMouseY - y;
 
 	lastMouseX = x;
 	lastMouseY = y;
@@ -171,20 +210,48 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
+bool init() {
+	if (!initGlfw() || !initGl() || !initImGui()) {
+		std::cerr << "ERROR: Initialization failed." << std::endl;
+		return false;
+	}
+
+	for (const auto& f : std::filesystem::directory_iterator("res/textures")) {
+		texturePacks.push_back(f.path().string());
+	}
+
+	if (texturePacks.size() < 1) {
+		std::cerr << "ERROR: Couldn't find any texture packs. Try to reinstall the game." << std::endl;
+		return false;
+	}
+
+	p_shader = new Shader("res/shaders/defaultShader");;
+	p_camera = new Camera(glm::vec3(0, 20, -5), 90, (float)WIDTH/(float)HEIGHT, 0.1f, 100.0f);
+	p_tex = new Texture(texturePacks[0]);
+	p_world = new World();
+	
+	p_tex->bind();
+
+	return true;
+}
+
 bool initGlfw() {
 	if (!glfwInit()) {
 		std::cerr << "Couldn't initialize the GLFW." << std::endl;
 		return false;
 	}
 
-	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", NULL, NULL);
+	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);					/*TODO: Fix fullscreen crash bug*/
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/ NULL, NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
 	}
 	
+	glfwSwapInterval(0);
 	glfwGetCursorPos(p_window, &lastMouseX, &lastMouseY);
 
+	glfwMaximizeWindow(p_window);
 	glfwSetCursorPosCallback(p_window, mouseCallback);
 	glfwSetWindowSizeCallback(p_window, windowSizeCallback);
 	glfwSetKeyCallback(p_window, keyCallback);
@@ -200,6 +267,9 @@ bool initGl() {
 		return false;
 	}
 	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	
@@ -228,4 +298,13 @@ bool initImGui() {
 	ImGui_ImplOpenGL3_Init("#version 130");
 
 	return true;
+}
+
+void clear() {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	glfwTerminate();  /* Dont have to call glfwDestroyWindow, glfwTerminate does it*/
+
+	delete p_shader;
+	delete p_tex;
 }

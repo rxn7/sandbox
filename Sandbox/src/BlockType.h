@@ -9,11 +9,12 @@ public:
 
 public:
 	inline std::string getName() const { return m_name;  }
-	inline bool isTranslucent() const { return !m_isSolid; }
+	inline bool renderNeighbours() const { return !m_solid; }
+	inline bool solid() const { return m_solid; }
 
 private:
 	std::string m_name;
-	bool m_isSolid;
+	bool m_solid;
 
 public:
 	glm::vec2 m_topTex;

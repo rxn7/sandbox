@@ -6,6 +6,8 @@
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 16
 
+#define VIEW_DISTANCE 8
+
 const static float TEX_WIDTH = 1.f / (float)ATLAS_COLUMNS;
 const static float TEX_HEIGHT = 1.f / (float)ATLAS_ROWS;
 
