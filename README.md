@@ -5,7 +5,7 @@ This was made for fun and for practicing c++ and opengl.
 The code is probably dogshit because I started learning c++ 3 days before starting this project.
 
 ## Features
-#### Texture Packs
+### Texture Packs
 You can create your own texture pack. You just need to put in res/textures folder. It should appear in the textures drop down (see image below) and you can choose it.
 
 
