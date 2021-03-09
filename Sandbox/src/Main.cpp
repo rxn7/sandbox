@@ -28,13 +28,10 @@
 
 int width= WIDTH, height= HEIGHT;
 
-int selectedShader;
-
-bool showDebug=true;
-bool showCursor = false;
+bool showDebug=true, showCursor = false;
 
 float moveSpeed=10;
-float dt;
+float deltaTime;
 double lastMouseX=0, lastMouseY=0;
 
 GLFWwindow* p_window;
@@ -64,7 +61,7 @@ int main() {
 		
 		/* Calculate delta between frames*/
 		now = (float)glfwGetTime();
-		dt = now - lastFrame;
+		deltaTime = now - lastFrame;
 		lastFrame = now;
 	}
 	
@@ -87,9 +84,8 @@ void update() {
 	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
 	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
 	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= glm::vec3(0, 1, 0);
-	moveSpeed = Input::getKey(GLFW_KEY_LEFT_CONTROL) ? MOVE_SPEED * 1.5f : MOVE_SPEED;
 
-	p_camera->move(moveDir * dt * moveSpeed);
+	p_camera->move(moveDir * deltaTime * moveSpeed);
 	p_camera->update();
 }
 
@@ -104,8 +100,8 @@ void drawImGui() {
 		/*Stats*/
 		if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
-				ImGui::Text("Fps: %.4g", 1.0f/dt);
-				ImGui::Text("Frame delta: %f", dt);
+				ImGui::Text("Fps: %.4g", 1.0f/deltaTime);
+				ImGui::Text("Frame delta: %f", deltaTime);
 			}
 						
 			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
