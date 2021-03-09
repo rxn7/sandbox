@@ -10,7 +10,7 @@ void Block::setType(uint16_t type) {
 	this->m_type = type;
 }
 
-glm::vec2 Block::getTexture(uint8_t face) {
+glm::vec2 Block::getTextureCoord(uint8_t face) {
 	switch (face) {
 		case 0: return getType().m_backTex;
 		case 1: return getType().m_frontTex;

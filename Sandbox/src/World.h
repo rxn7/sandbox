@@ -9,7 +9,10 @@ public:
 	virtual ~World();
 
 public:
+	/// <summary> Generates the world. </summary>
 	void generate();
+
+	/// <summary> Calls draw() on all the chunks. </summary>
 	void draw(Shader& shader, const Camera& camera);
 	
 public:

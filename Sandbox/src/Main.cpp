@@ -26,14 +26,15 @@
 #define SENSITIVITY 0.1f
 #define MOVE_SPEED 10
 
-int width= WIDTH, height= HEIGHT;
+int width = WIDTH, height = HEIGHT;
 
-bool showDebug=true, showCursor = false;
+bool showDebug = true, showCursor = false;
 
-float moveSpeed=10;
-float deltaTime;
-double lastMouseX=0, lastMouseY=0;
+float moveSpeed = 10;
+float dt;
+double lastMouseX = 0, lastMouseY = 0;
 
+ImGuiContext* p_imguiContext;
 GLFWwindow* p_window;
 Shader* p_shader;
 Camera* p_camera;
@@ -48,24 +49,25 @@ int main() {
 		return -1;
 	}
 
-	float now=0, lastFrame=0;
+	float now = 0, lastFrame = 0;
 	/*Main loop*/
 	while (!glfwWindowShouldClose(p_window)) {
+		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		update();
 		draw();
-
-		glfwSwapBuffers(p_window);
-		glfwPollEvents();
 		
+		glfwSwapBuffers(p_window);
+
 		/* Calculate delta between frames*/
 		now = (float)glfwGetTime();
-		deltaTime = now - lastFrame;
-		lastFrame = now;
+		dt = now - lastFrame;
+		lastFrame = now; 
 	}
-	
+
 	clear();
+	return 0;
 }
 
 void draw() {
@@ -78,15 +80,17 @@ void update() {
 
 	glm::vec3 moveDir(0, 0, 0);
 	glm::vec3 forward = glm::normalize(glm::vec3(p_camera->getForward().x, 0, p_camera->getForward().z));
+	glm::vec3 up = glm::vec3(0,1,0);
 	if (Input::getKey(GLFW_KEY_W)) moveDir += forward;
 	if (Input::getKey(GLFW_KEY_S)) moveDir -= forward;
 	if (Input::getKey(GLFW_KEY_A)) moveDir += p_camera->getLeft();
 	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
 	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
-	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= glm::vec3(0, 1, 0);
+	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= up;
 
-	p_camera->move(moveDir * deltaTime * moveSpeed);
-	p_camera->update();
+	if (moveDir != glm::vec3()) {
+		p_camera->move(moveDir * dt * moveSpeed);
+	}
 }
 
 void drawImGui() {
@@ -100,21 +104,22 @@ void drawImGui() {
 		/*Stats*/
 		if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
-				ImGui::Text("Fps: %.4g", 1.0f/deltaTime);
-				ImGui::Text("Frame delta: %f", deltaTime);
+				ImGui::Text("Fps: %.4g", 1.0f/dt);
+				ImGui::Text("Frame delta: %f", dt);
 			}
-						
+
 			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
 			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_camera->getForward().x, p_camera->getForward().y, p_camera->getForward().z);
-    		ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
+			ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
 		}
-		 
+
 		/*Settings*/
 		if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 100, "%.0f", 1);
-
+			/*Camera FOV*/
 			if (ImGui::SliderFloat("Camera Fov", &p_camera->m_fov, 1, 179, "%.0f", 1)) {
 				p_camera->recalculatePerspective(width, height);
+				p_camera->update();
 			}
 
 			/*Shaders*/
@@ -122,20 +127,22 @@ void drawImGui() {
 				if (ImGui::Selectable("Default")) {
 					delete p_shader;
 					p_shader = new Shader("res/shaders/defaultShader");
-				} else if (ImGui::Selectable("Transparent")) {
+				}
+				else if (ImGui::Selectable("Transparent")) {
 					delete p_shader;
 					p_shader = new Shader("res/shaders/transparentShader");
-				} else if (ImGui::Selectable("Inverted colors")) {
+				}
+				else if (ImGui::Selectable("Inverted colors")) {
 					delete p_shader;
 					p_shader = new Shader("res/shaders/invertedShader");
 				}
 				ImGui::EndCombo();
 			}
-			
+
 			/*Texture Packs*/
 			if (ImGui::BeginCombo("Texture", "Choose Texture")) {
 				for (unsigned int i = 0; i<texturePacks.size(); i++) {
-					std::string name  = texturePacks[i].substr(texturePacks[i].find_last_of("/\\") + 1);
+					std::string name = texturePacks[i].substr(texturePacks[i].find_last_of("/\\") + 1);
 					if (ImGui::Selectable(name.c_str())) {
 						delete p_tex;
 						p_tex = new Texture(texturePacks[i]);
@@ -145,7 +152,7 @@ void drawImGui() {
 				ImGui::EndCombo();
 			}
 		}
-
+		
 		/*Generate World*/
 		if (ImGui::Button("Generate World")) {
 			/*Delete all generated chunks before genereting new ones*/
@@ -156,7 +163,7 @@ void drawImGui() {
 			p_world->m_chunks.clear();
 			p_world->generate();
 		}
-		
+
 		ImGui::End();
 	}
 
@@ -223,9 +230,8 @@ bool init() {
 
 	p_shader = new Shader("res/shaders/defaultShader");;
 	p_camera = new Camera(glm::vec3(0, 20, -5), 90, (float)WIDTH/(float)HEIGHT, 0.1f, 100.0f);
-	p_tex = new Texture(texturePacks[0]);
-	p_world = new World();
-	
+	p_tex	 = new Texture(texturePacks[0]);
+	p_world	 = new World();
 	p_tex->bind();
 
 	return true;
@@ -236,24 +242,29 @@ bool initGlfw() {
 		std::cerr << "Couldn't initialize the GLFW." << std::endl;
 		return false;
 	}
-
-	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);					/*TODO: Fix fullscreen crash bug*/
+	
 	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/ NULL, NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
 	}
+
+	glewExperimental = true;
+
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	
+	glfwMakeContextCurrent(p_window);
 	
 	glfwSwapInterval(0);
 	glfwGetCursorPos(p_window, &lastMouseX, &lastMouseY);
-
 	glfwMaximizeWindow(p_window);
+	
 	glfwSetCursorPosCallback(p_window, mouseCallback);
 	glfwSetWindowSizeCallback(p_window, windowSizeCallback);
 	glfwSetKeyCallback(p_window, keyCallback);
-
-	glfwMakeContextCurrent(p_window);
-
+	glfwSetErrorCallback(errorCallback);
+	
 	return true;
 }
 
@@ -262,18 +273,18 @@ bool initGl() {
 		std::cerr << "Couldn't initialize the GLEW." << std::endl;
 		return false;
 	}
-	
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
 	glClearColor(0.53f, 0.8f, 0.92f, 1);
-	
+
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -282,25 +293,32 @@ bool initGl() {
 }
 
 bool initImGui() {
-	if (!IMGUI_CHECKVERSION())
+	if (!IMGUI_CHECKVERSION()) {
 		return false;
+	}
 
-	auto context = ImGui::CreateContext();
-	ImGui::SetCurrentContext(context);
-
-	ImGuiIO& io = ImGui::GetIO();
+	p_imguiContext = ImGui::CreateContext();
+	ImGui::SetCurrentContext(p_imguiContext);
 
 	ImGui_ImplGlfw_InitForOpenGL(p_window, true);
 	ImGui_ImplOpenGL3_Init("#version 130");
-
+	
 	return true;
 }
 
+void errorCallback(int error, const char* desc) {
+	std::cerr << "GLFW ERROR "<< error << ": " << desc << std::endl;
+}
+
 void clear() {
-	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
-	glfwTerminate();  /* Dont have to call glfwDestroyWindow, glfwTerminate does it*/
+	ImGui_ImplOpenGL3_Shutdown();
+	glfwDestroyWindow(p_window);
+	glfwTerminate(); 
 
 	delete p_shader;
 	delete p_tex;
+	delete p_camera;
+	delete p_world;
+	delete p_imguiContext;
 }

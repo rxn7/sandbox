@@ -94,8 +94,9 @@ namespace Sandbox_Launcher {
 
         private void PlayButton_Click(object sender, RoutedEventArgs e) {
             if (File.Exists(gameExe) && Status == LauncherStatus.READY) {
-                ProcessStartInfo startInfo = new ProcessStartInfo(gameExe);
-                startInfo.WorkingDirectory = Path.Combine(rootPath, "Sandbox");
+                ProcessStartInfo startInfo = new ProcessStartInfo(gameExe) {
+                    WorkingDirectory = Path.Combine(rootPath, "Sandbox")
+                };
                 Process.Start(startInfo);
 
                 Close();
@@ -106,6 +107,10 @@ namespace Sandbox_Launcher {
 
         private void DownloadGameCompletedCallback(object sender, AsyncCompletedEventArgs e) {
             try {
+                if (Directory.Exists(Path.Combine(rootPath, "Sandbox"))) {
+                    Directory.Delete(Path.Combine(rootPath, "Sandbox"), true);
+                }
+
                 string onlineVer = ((Version)e.UserState).ToString();
                 ZipFile.ExtractToDirectory(gameZip, rootPath);
                 File.Delete(gameZip);
@@ -132,7 +137,7 @@ namespace Sandbox_Launcher {
     struct Version {
         internal static Version zero = new Version(0, 0, 0);
 
-        private short major, minor, subMinor;
+        private readonly short major, minor, subMinor;
 
         internal Version(short major, short minor, short subMinor) {
             this.major = major;

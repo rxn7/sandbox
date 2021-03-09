@@ -1,5 +1,5 @@
 #include "Chunk.h"
-#include "core/Definitions.h"
+#include "Definitions.h"
 #include "BlocksContainer.cpp"
 #include "core/render/Shader.h"
 #include <iostream>
@@ -85,7 +85,7 @@ void Chunk::updateMeshData(const glm::i16vec3& pos) {
 			m_triangles.push_back(m_vertexIndex+1);
 			m_triangles.push_back(m_vertexIndex+3);
 
-			addTexture(block.getTexture(f));
+			addTexture(block.getTextureCoord(f));
 
 			m_vertexIndex += 4;
 		}

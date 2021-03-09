@@ -5,7 +5,7 @@
 #include "core/render/Mesh.h"
 #include "ChunkCoord.h"
 #include "Block.h"
-#include "core/Definitions.h"
+#include "Definitions.h"
 
 class Chunk {
 public:
@@ -13,19 +13,35 @@ public:
 	~Chunk();
 
 public:
-	//void getVoxelFromGlobalPos(glm::vec3 pos);
-	//void updateChunk();
+	/// <summary> Updates the chunk mesh data for each block. </summary>
 	void update();
+
+	/// <summary> Updates chunk mesh data for block at specified pos. </summary>
 	void updateMeshData(const glm::i16vec3& pos);
+	
+	/// <summary> Creates the mesh. </summary>
 	void createMesh();
+
+	/// <summary> Adds the tex coords to the buffer. </summary>
 	void addTexture(const glm::vec2& texPos);
+	
+	/// <summary> Draws the mesh. </summary>
 	void draw(Shader& shader, const Camera& camera);
+	
+	/// <summary> Returns BlockType of block at the specified pos. </summary>
 	BlockType getVoxel(const glm::i16vec3& pos);
+
+	/// <summary> Returns id of block at the specified pos. </summary>
 	uint16_t getVoxelID(const glm::i16vec3& pos);
+
+	/// <summary> Returns the m_coord. </summary>
 	inline ChunkCoord getChunkCoord() const { return m_coord; }
 
 private:
+	/// <summary> Generates terrain. </summary>
 	void generateTerrain();
+
+	/// <summary> Clears the mesh buffer data. </summary>
 	void clearMeshData();
 
 public:

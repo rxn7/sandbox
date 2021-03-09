@@ -7,12 +7,15 @@
 
 class Shader {
 public:
-	Shader() {}
+	Shader();
 	Shader(const std::string& fileName);
 	virtual ~Shader();
 
 public:
+	/// <summary> Binds this shader. </summary>
 	void bind();
+
+	/// <summary> Updates the transform uniform in shader. </summary>
 	void update(const Transform& transform, const Camera& camera);
 
 private:

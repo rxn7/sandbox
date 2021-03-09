@@ -9,6 +9,13 @@ static void checkShaderError(GLuint shader, GLuint flag, bool isProgram, const s
 static std::string loadShader(const std::string& fileName);
 static GLuint createShader(const std::string& rawText, GLenum shaderType);
 
+Shader::Shader() {
+	m_program = 0;
+
+	m_shaders[0] = 0;
+	m_shaders[1] = 1;
+}
+
 Shader::Shader(const std::string& fileName) {
 	m_program = glCreateProgram();
 	
