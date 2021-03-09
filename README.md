@@ -14,7 +14,7 @@ You can create your own texture pack. You just need to put it in res/textures fo
 ![ss5](https://user-images.githubusercontent.com/60551555/110389799-528da980-8065-11eb-8dd9-3cb4f9396a23.png)
 
 ### Launcher
-Why'd you have to download new game files every time when there's a new update when you can just download the **Launcher** that will do it for you?
+Why would you need to download new game files every time a new update comes out when you can just download the **Launcher**, which will do it for you? 
 <br><br>
 ![launcher ss](https://user-images.githubusercontent.com/60551555/110402493-caff6500-807b-11eb-8f74-30e31c8b4363.png)
 <br><br>
