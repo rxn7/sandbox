@@ -6,6 +6,7 @@ The code is probably dogshit because I started learning c++ 3 days before starti
 
 ## Installation
 You can download the launcher or you can compile the game yourself.
+!**REMEMBER TO UNZIP THE FILE BEFORE RUNNING THE LAUNCHER**!
 
 ## Features
 ### Texture Packs
