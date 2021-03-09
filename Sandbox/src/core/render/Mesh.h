@@ -23,21 +23,19 @@ public:
 
 class Mesh {
 public:
-	Mesh() {
-		m_vao = 0;
-		m_vbo = 0;
-		m_ebo = 0;
-	}
-
+	Mesh();
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 	virtual ~Mesh();
 
 public:
+	/// <summary> Binds the specified shader and draws the elements. </summary>
 	void draw(const Camera& camera, Shader& shader);
 
+	/// <summary> Returns pointer to m_transform. </summary>
 	inline Transform* getTransform() { return &m_transform; }
 
 private:
+	/// <summary> Generates buffers and sets vertex attrib pointers. </summary>
 	void setupMesh();
 	
 public:

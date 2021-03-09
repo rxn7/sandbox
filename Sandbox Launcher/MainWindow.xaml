@@ -8,18 +8,20 @@
         Title="Rotthin's Sandbox Launcher" Height="450" Width="800" Background="White"
         WindowStartupLocation="CenterScreen"
         ContentRendered="Window_ContentRendered"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        >
     <Grid x:Name="LauncherWindow">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="174*"/>
+            <ColumnDefinition Width="147*"/>
+            <ColumnDefinition Width="27*"/>
             <ColumnDefinition Width="437*"/>
             <ColumnDefinition Width="183*"/>
         </Grid.ColumnDefinitions>
-        <Image Stretch="UniformToFill" Source="Background.png" Grid.ColumnSpan="3"></Image>
-        <Label x:Name="TitleLabel" Content="Rotthin's Sandbox&#xD;&#xA;" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.337,0.278" Height="42" Width="231" FontFamily="Roboto Slab" FontWeight="Bold" FontSize="25" Grid.ColumnSpan="2"/>
-        <Label x:Name="VersionLabel" Content="v0.1" HorizontalAlignment="Left" Margin="60,20,0,0" VerticalAlignment="Top" FontFamily="Roboto Light" Height="25" Width="132" Grid.Column="1"/>
-        <Button x:Name="PlayButton" Content="Checking for Updates" Grid.Column="1" HorizontalAlignment="Left" Margin="99,347,0,0" VerticalAlignment="Top" Width="251" Height="62" Background="#FFDEDEDE" BorderThickness="6" Click="PlayButton_Click" FontFamily="Raleway SemiBold" FontSize="20" FontWeight="Thin" BorderBrush="#FFC5C5C5" Foreground="Black"/>
-        <Button x:Name="GithubButton" HorizontalAlignment="Left" Margin="125,10,0,0" VerticalAlignment="Top" Width="31" Height="28" Grid.Column="2" Click="GithubButton_Click" RenderTransformOrigin="0.5,0.5" Grid.IsSharedSizeScope="True" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{StaticResource LinkButton}">
+        <Image Stretch="UniformToFill" Source="Background.png" Grid.ColumnSpan="4"></Image>
+        <Label x:Name="TitleLabel" Content="Rotthin's Sandbox&#xD;&#xA;" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.337,0.278" Height="42" Width="231" FontFamily="Roboto Slab" FontWeight="Bold" FontSize="25" Grid.ColumnSpan="3"/>
+        <Label x:Name="VersionLabel" Content="v?.?.?" HorizontalAlignment="Left" Margin="60,20,0,0" VerticalAlignment="Top" FontFamily="Roboto Light" Height="25" Width="132" Grid.Column="2"/>
+        <Button x:Name="PlayButton" Content="Checking for Updates" Grid.Column="2" HorizontalAlignment="Left" Margin="99,347,0,0" VerticalAlignment="Top" Width="251" Height="62" Background="#FFDEDEDE" BorderThickness="6" Click="PlayButton_Click" FontFamily="Raleway SemiBold" FontSize="20" FontWeight="Thin" BorderBrush="#FFC5C5C5" Foreground="Black"/>
+        <Button x:Name="GithubButton" HorizontalAlignment="Left" Margin="74,10,0,0" VerticalAlignment="Top" Width="82" Height="74" Grid.Column="3" Click="GithubButton_Click" RenderTransformOrigin="0.5,0.5" Grid.IsSharedSizeScope="True" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{StaticResource LinkButton}">
             <Button.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>

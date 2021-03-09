@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Libs.h"
-#include "core/Definitions.h"
+#include "Definitions.h"
 
 struct ChunkCoord {
 	int32_t x, y;

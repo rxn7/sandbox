@@ -1,6 +1,6 @@
 #include "BlockType.h"
 #include <iostream>
-#include "core/Definitions.h"
+#include "Definitions.h"
 
 BlockType::BlockType(const std::string name, const bool isSolid, const glm::vec2& top, const glm::vec2& bot, const glm::vec2& left, const glm::vec2& right, const glm::vec2& front, const glm::vec2& back){
 	m_name = name;
