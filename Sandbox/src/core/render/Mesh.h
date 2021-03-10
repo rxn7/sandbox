@@ -44,6 +44,5 @@ public:
 	
 private:
 	Transform m_transform;
-
 	GLuint m_vao, m_vbo, m_ebo;
 };

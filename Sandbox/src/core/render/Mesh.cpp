@@ -12,18 +12,19 @@ Mesh::Mesh() {
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) {
 	m_vertices = vertices;
 	m_indices = indices;
-
 	setupMesh();
 }
 
 Mesh::~Mesh() {
 	glDeleteVertexArrays(1, &m_vao);
-	glDeleteVertexArrays(1, &m_vbo);
-	glDeleteVertexArrays(1, &m_ebo);
+	
+	/* Delete the buffers, otherwise memory leak will occur. */
+	glDeleteBuffers(1, &m_ebo);
+	glDeleteBuffers(1, &m_vbo);
 }
 
 void Mesh::draw(const Camera& camera, Shader& shader) {
-	if (glm::distance(camera.getPosition(), m_transform.getPos()) > 160) {
+	if (glm::distance(camera.getPosition(), m_transform.getPos()) > VIEW_DISTANCE * CHUNK_WIDTH) {
 		return;
 	}
 

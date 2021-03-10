@@ -1,11 +1,14 @@
 #pragma once
 
-#define ATLAS_SIZE 3
+#define ATLAS_SIZE 8
 
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 16
 
 #define VIEW_DISTANCE 8
+
+#define RAYCAST_PRECISION 0.1f
+#define INTERACT_RANGE 16
 
 const static float TEX_SIZE = 1.f / (float)ATLAS_SIZE;
 

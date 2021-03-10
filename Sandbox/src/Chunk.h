@@ -3,16 +3,48 @@
 #include <vector>
 #include "core/Libs.h"
 #include "core/render/Mesh.h"
-#include "ChunkCoord.h"
 #include "Block.h"
 #include "Definitions.h"
 
 class World;
 
+struct ChunkCoord {
+	int x, y;
+
+	ChunkCoord(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+
+	ChunkCoord() {
+		x = 0;
+		y = 0;
+	}
+
+	static ChunkCoord getFromVec3(glm::vec3 pos) {
+		int x = floor(pos.x) / CHUNK_WIDTH;
+		int y = floor(pos.z) / CHUNK_WIDTH;
+		
+		return ChunkCoord(x, y);
+	}
+
+	bool operator==(const ChunkCoord& other) const {
+		return (x == other.x && y == other.y);
+	}
+};
+
+namespace std {
+	template<> struct hash<ChunkCoord> {
+		std::size_t operator()(ChunkCoord const& c) const noexcept {
+			return std::hash<size_t>{}(c.x + c.y);
+		}
+	};
+}
+
 class Chunk {
 public:
 	Chunk(World& world, ChunkCoord coord);
-	~Chunk();
+	virtual ~Chunk();
 
 public:
 	/// <summary> Updates the chunk mesh data for each block. </summary>
@@ -41,7 +73,7 @@ public:
 
 private:
 	/// <summary> Generates terrain. </summary>
-	void generateTerrain(World& world);
+	void generateTerrain();
 
 	/// <summary> Clears the mesh buffer data. </summary>
 	void clearMeshData();
@@ -50,6 +82,7 @@ public:
 	Block m_map[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
 
 private:
+	World* mp_world;
 	Mesh* mp_mesh;
 	ChunkCoord m_coord;
 

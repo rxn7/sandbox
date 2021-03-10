@@ -5,17 +5,22 @@
 #include <iostream>
 
 Chunk::Chunk(World& world, ChunkCoord coord) {
+	mp_world = &world;
 	m_coord = coord;
-	generateTerrain(world);
+	generateTerrain();
 	update();
 	createMesh();
 }
 
-void Chunk::generateTerrain(World& world) {
+Chunk::~Chunk() {
+	delete mp_mesh;
+}
+
+void Chunk::generateTerrain() {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
 			for (int y = 0; y<CHUNK_HEIGHT; y++) {
-				m_map[x][y][z].setType(world.getBlock(glm::vec3(x,y,z)));
+				m_map[x][y][z].setType(mp_world->generateBlock(glm::vec3(x,y,z)));
 			}
 		}
 	}
@@ -53,10 +58,6 @@ uint16_t Chunk::getVoxelID(const glm::i16vec3& pos) {
 	}
 
 	return m_map[pos.x][pos.y][pos.z].getTypeID();
-}
-
-Chunk::~Chunk() {
-	delete mp_mesh;
 }
 
 void Chunk::clearMeshData() {

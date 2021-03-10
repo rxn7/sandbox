@@ -42,7 +42,6 @@ Camera* p_camera;
 World* p_world;
 Texture* p_tex;
 
-std::vector<Mesh*> meshes;
 std::vector<std::string> texturePacks;
 
 int main() {
@@ -52,7 +51,7 @@ int main() {
 	}
 
 	float now = 0, lastFrame = 0;
-	/*Main loop*/
+	/*Main loop */
 	while (!glfwWindowShouldClose(p_window)) {
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -67,7 +66,7 @@ int main() {
 		dt = now - lastFrame;
 		lastFrame = now; 
 	}
-
+	
 	clear();
 	return 0;
 }
@@ -98,6 +97,8 @@ void update() {
 	if (moveDir != glm::vec3()) {
 		p_camera->move(moveDir * dt * moveSpeed);
 	}
+
+	p_world->checkViewDistance(*p_camera);
 }
 
 void drawImGui() {
@@ -116,6 +117,7 @@ void drawImGui() {
 			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Text("Fps: %.4g", 1.0f/dt);
 				ImGui::Text("Frame delta: %f", dt);
+				ImGui::Text("Chunk count: %u", p_world->m_chunks.size());
 			}
 
 			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
@@ -160,18 +162,6 @@ void drawImGui() {
 				ImGui::EndCombo();
 			}
 		}
-		
-		/* Generate World */
-		if (ImGui::Button("Generate World")) {
-			/* Delete all generated chunks before genereting new ones */
-			for (int i = 0; i<p_world->m_chunks.size(); i++) {
-				delete p_world->m_chunks[i];
-			}
-
-			p_world->m_chunks.clear();
-			p_world->generate();
-		}
-
 		ImGui::End();
 	}
 
@@ -186,8 +176,8 @@ void drawImGui() {
 void drawCrosshair() {
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
 	ImVec2 offset(width/2, height/2);
-	drawList->AddLine(ImVec2(offset.x-15, offset.y), ImVec2(offset.x+15, offset.y), IM_COL32(50,155, 50,255), 4);
-	drawList->AddLine(ImVec2(offset.x, offset.y-15), ImVec2(offset.x, offset.y+15), IM_COL32(50,155,50,255), 4);
+	drawList->AddLine(ImVec2(offset.x-15, offset.y), ImVec2(offset.x+15, offset.y), IM_COL32(255,255,255,255), 4);
+	drawList->AddLine(ImVec2(offset.x, offset.y-15), ImVec2(offset.x, offset.y+15), IM_COL32(255,255,255,255), 4);
 }
 
 void windowSizeCallback(GLFWwindow* window, int w, int h) {
@@ -255,9 +245,9 @@ bool init() {
 	}
 
 	p_shader = new Shader("res/shaders/defaultShader");;
-	p_camera = new Camera(glm::vec3(0, 20, -5), 90, (float)WIDTH/(float)HEIGHT, 0.1f, 100.0f);
+	p_camera = new Camera(glm::vec3(0, 20, -5), 90, (float)WIDTH/(float)HEIGHT, 0.1f, 1000.0f);
 	p_tex	 = new Texture(texturePacks[0]);
-	p_world	 = new World();
+	p_world	 = new World(*p_camera);
 	p_tex->bind();
 
 	return true;
