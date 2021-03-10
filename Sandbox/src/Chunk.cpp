@@ -1,22 +1,22 @@
-#include "Chunk.h"
+#include "World.h"
 #include "Definitions.h"
 #include "BlocksContainer.cpp"
 #include "core/render/Shader.h"
 #include <iostream>
 
-Chunk::Chunk(ChunkCoord coord) {
+Chunk::Chunk(World& world, ChunkCoord coord) {
 	m_coord = coord;
-	generateTerrain();
+	generateTerrain(world);
 	update();
 	createMesh();
 }
 
-void Chunk::generateTerrain() {
+void Chunk::generateTerrain(World& world) {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
-			int y = rand() & 10 + 5;
-			uint16_t blockType = rand() % 8;
-			m_map[x][y][z].setType(blockType);
+			for (int y = 0; y<CHUNK_HEIGHT; y++) {
+				m_map[x][y][z].setType(world.getBlock(glm::vec3(x,y,z)));
+			}
 		}
 	}
 }

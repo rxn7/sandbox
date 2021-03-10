@@ -1,7 +1,7 @@
 #pragma once
+
 #include <vector>
 #include "Chunk.h"
-#include <unordered_map>
 
 class World {
 public:
@@ -16,7 +16,7 @@ public:
 	void draw(Shader& shader, const Camera& camera);
 	
 	/// <summary> Returns block type at specified position. </summary>
-	uint8_t getBlock(glm::ivec3 pos);
+	uint16_t getBlock(glm::ivec3 pos);
 
 public:
 	std::vector<Chunk*> m_chunks;

@@ -9,6 +9,7 @@
 #define TYPE_STONE 4
 #define TYPE_BRICKS 5
 #define TYPE_BEDROCK 6
+#define TYPE_OAK_LOG 7
 
 namespace Blocks {
 	static const BlockType AIR			("Air",				false);
@@ -18,6 +19,7 @@ namespace Blocks {
 	static const BlockType STONE        ("Stone",			true,  4,4,4,4,4,4);
 	static const BlockType BRICKS       ("Bricks",			true,  5,5,5,5,5,5);
 	static const BlockType BEDROCK      ("Bedrock",			true,  6,6,6,6,6,6);
+	static const BlockType OAK_LOG      ("OAK_LOG",			true,  8,8,7,7,7,7);
 
 	static const BlockType BLOCK_TYPES[] = {
 		AIR,
@@ -27,5 +29,6 @@ namespace Blocks {
 		STONE,
 		BRICKS,
 		BEDROCK,
+		OAK_LOG,
 	};
 }

@@ -7,9 +7,11 @@
 #include "Block.h"
 #include "Definitions.h"
 
+class World;
+
 class Chunk {
 public:
-	Chunk(ChunkCoord coord);
+	Chunk(World& world, ChunkCoord coord);
 	~Chunk();
 
 public:
@@ -39,7 +41,7 @@ public:
 
 private:
 	/// <summary> Generates terrain. </summary>
-	void generateTerrain();
+	void generateTerrain(World& world);
 
 	/// <summary> Clears the mesh buffer data. </summary>
 	void clearMeshData();

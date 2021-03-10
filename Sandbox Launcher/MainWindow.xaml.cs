@@ -63,7 +63,7 @@ namespace Sandbox_Launcher {
                     else Status = LauncherStatus.READY;
 
                     client.Dispose();
-                } catch (Exception ex){
+                } catch (Exception ex) {
                     Status = LauncherStatus.FAILED;
                     MessageBox.Show($"Error checking for game updates: {ex}");
                 }
@@ -86,7 +86,7 @@ namespace Sandbox_Launcher {
                 client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadGameCompletedCallback);
                 client.DownloadFileAsync(new Uri("https://drive.google.com/uc?export=download&id=1gSDqmuigCa2KyNjvGnPRuY5Mo6Yan3Yp"), gameZip, ver);
                 client.Dispose();
-            } catch (Exception ex){
+            } catch (Exception ex) {
                 Status = LauncherStatus.FAILED;
                 MessageBox.Show($"Error updating the game files: {ex}");
             }
@@ -100,7 +100,7 @@ namespace Sandbox_Launcher {
                 Process.Start(startInfo);
 
                 Close();
-            }else if(Status == LauncherStatus.FAILED) {
+            } else if (Status == LauncherStatus.FAILED) {
                 CheckForUpdates();
             }
         }
@@ -119,7 +119,7 @@ namespace Sandbox_Launcher {
 
                 VersionLabel.Content = $"v" + onlineVer;
                 Status = LauncherStatus.READY;
-            }catch(Exception ex) {
+            } catch (Exception ex) {
                 Status = LauncherStatus.FAILED;
                 MessageBox.Show($"Error finishing download: {ex}");
             }
@@ -147,7 +147,7 @@ namespace Sandbox_Launcher {
 
         internal Version(string version) {
             string[] verStrings = version.Split('.');
-            if(verStrings.Length != 3) {
+            if (verStrings.Length != 3) {
                 major = 0;
                 minor = 0;
                 subMinor = 0;
@@ -160,7 +160,7 @@ namespace Sandbox_Launcher {
         }
 
         internal bool IsDifferent(Version other) {
-            if(major != other.major) return true;
+            if (major != other.major) return true;
             if (minor != other.minor) return true;
             if (subMinor != other.subMinor) return true;
 
