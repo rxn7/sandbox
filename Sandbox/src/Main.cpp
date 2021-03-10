@@ -28,7 +28,7 @@
 
 int width = WIDTH, height = HEIGHT;
 
-bool showDebug = true, showCursor = false;
+bool showGui = true, showDebug = true, showCursor = false;
 
 float moveSpeed = 10;
 float dt;
@@ -37,10 +37,12 @@ double lastMouseX = 0, lastMouseY = 0;
 ImGuiContext* p_imguiContext;
 GLFWwindow* p_window;
 Shader* p_shader;
+Shader* p_crosshairShader;
 Camera* p_camera;
 World* p_world;
 Texture* p_tex;
 
+std::vector<Mesh*> meshes;
 std::vector<std::string> texturePacks;
 
 int main() {
@@ -60,7 +62,7 @@ int main() {
 		
 		glfwSwapBuffers(p_window);
 
-		/* Calculate delta between frames*/
+		/* Calculate delta between frames. */
 		now = (float)glfwGetTime();
 		dt = now - lastFrame;
 		lastFrame = now; 
@@ -72,7 +74,11 @@ int main() {
 
 void draw() {
 	p_world->draw(*p_shader, *p_camera);
-	drawImGui();
+		
+	glm::vec3 pos = p_camera->getPosition();
+	glm::vec3 forw = p_camera->getForward();
+
+	drawImGui(); 
 }
 
 void update() {
@@ -87,21 +93,25 @@ void update() {
 	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
 	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
 	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= up;
-
+	
+	/* Camera::move recalculates the view projection so call it only if needed. */
 	if (moveDir != glm::vec3()) {
 		p_camera->move(moveDir * dt * moveSpeed);
 	}
 }
 
 void drawImGui() {
+	if (!showGui) return;
+
+	/* Start new frame */
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	/*Debug*/
+	/* Debug */
 	if (showDebug) {
 		ImGui::Begin("Debug");
-		/*Stats*/
+		/* Stats */
 		if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Text("Fps: %.4g", 1.0f/dt);
@@ -113,35 +123,33 @@ void drawImGui() {
 			ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
 		}
 
-		/*Settings*/
+		/* Settings */
 		if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 100, "%.0f", 1);
-			/*Camera FOV*/
+			/* Camera FOV */
 			if (ImGui::SliderFloat("Camera Fov", &p_camera->m_fov, 1, 179, "%.0f", 1)) {
 				p_camera->recalculatePerspective(width, height);
 				p_camera->update();
 			}
 
-			/*Shaders*/
+			/* Shaders */
 			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
 				if (ImGui::Selectable("Default")) {
 					delete p_shader;
 					p_shader = new Shader("res/shaders/defaultShader");
-				}
-				else if (ImGui::Selectable("Transparent")) {
+				} else if (ImGui::Selectable("Transparent")) {
 					delete p_shader;
 					p_shader = new Shader("res/shaders/transparentShader");
-				}
-				else if (ImGui::Selectable("Inverted colors")) {
+				} else if (ImGui::Selectable("Inverted colors")) {
 					delete p_shader;
 					p_shader = new Shader("res/shaders/invertedShader");
 				}
 				ImGui::EndCombo();
 			}
 
-			/*Texture Packs*/
+			/* Texture Packs */
 			if (ImGui::BeginCombo("Texture", "Choose Texture")) {
-				for (unsigned int i = 0; i<texturePacks.size(); i++) {
+				for (uint8_t i = 0; i<texturePacks.size(); i++) {
 					std::string name = texturePacks[i].substr(texturePacks[i].find_last_of("/\\") + 1);
 					if (ImGui::Selectable(name.c_str())) {
 						delete p_tex;
@@ -153,9 +161,9 @@ void drawImGui() {
 			}
 		}
 		
-		/*Generate World*/
+		/* Generate World */
 		if (ImGui::Button("Generate World")) {
-			/*Delete all generated chunks before genereting new ones*/
+			/* Delete all generated chunks before genereting new ones */
 			for (int i = 0; i<p_world->m_chunks.size(); i++) {
 				delete p_world->m_chunks[i];
 			}
@@ -167,8 +175,19 @@ void drawImGui() {
 		ImGui::End();
 	}
 
+	drawCrosshair();
+
+	/* Render */
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+/* TODO: Make an actual shader for this and not do it in ImGui. */
+void drawCrosshair() {
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+	ImVec2 offset(width/2, height/2);
+	drawList->AddLine(ImVec2(offset.x-15, offset.y), ImVec2(offset.x+15, offset.y), IM_COL32(50,155, 50,255), 4);
+	drawList->AddLine(ImVec2(offset.x, offset.y-15), ImVec2(offset.x, offset.y+15), IM_COL32(50,155,50,255), 4);
 }
 
 void windowSizeCallback(GLFWwindow* window, int w, int h) {
@@ -207,10 +226,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_TAB:
 			showDebug = !showDebug;
 			break;
+
+		case GLFW_KEY_F1:
+			showGui = !showGui;
+			break;
 		}
 	} else if (action == GLFW_RELEASE) {
 		Input::setKey(key, false);
 	}
+}
+
+void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 bool init() {
@@ -243,7 +269,7 @@ bool initGlfw() {
 		return false;
 	}
 	
-	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/ NULL, NULL);
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /* glfwGetPrimaryMonitor() */ NULL, NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
@@ -251,8 +277,9 @@ bool initGlfw() {
 
 	glewExperimental = true;
 
+	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); /* Use only OpenGL core */
 	
 	glfwMakeContextCurrent(p_window);
 	
@@ -260,6 +287,7 @@ bool initGlfw() {
 	glfwGetCursorPos(p_window, &lastMouseX, &lastMouseY);
 	glfwMaximizeWindow(p_window);
 	
+	glfwSetMouseButtonCallback(p_window, mouseBtnCallback);
 	glfwSetCursorPosCallback(p_window, mouseCallback);
 	glfwSetWindowSizeCallback(p_window, windowSizeCallback);
 	glfwSetKeyCallback(p_window, keyCallback);
@@ -274,6 +302,8 @@ bool initGl() {
 		return false;
 	}
 
+	glLineWidth(5);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -283,7 +313,7 @@ bool initGl() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glClearColor(0.53f, 0.8f, 0.92f, 1);
+	glClearColor(0, 140/255, 1.0, 1.0);
 
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glMatrixMode(GL_PROJECTION);
@@ -320,5 +350,4 @@ void clear() {
 	delete p_tex;
 	delete p_camera;
 	delete p_world;
-	delete p_imguiContext;
 }

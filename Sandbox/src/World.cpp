@@ -25,3 +25,7 @@ void World::generate() {
 		}
 	}
 }
+
+uint8_t getBlock(glm::ivec3 pos) {
+	return 0;
+}

@@ -11,7 +11,7 @@ static GLuint createShader(const std::string& rawText, GLenum shaderType);
 
 Shader::Shader() {
 	m_program = 0;
-
+	
 	m_shaders[0] = 0;
 	m_shaders[1] = 1;
 }

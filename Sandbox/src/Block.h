@@ -21,7 +21,7 @@ public:
 	inline uint16_t getTypeID() { return m_type; }
 	
 	/// <summary> Returns the tex coord of specified face. </summary>
-	glm::vec2 getTextureCoord(uint8_t face);
+	uint16_t getTextureID(uint8_t face);
 
 private:
 	uint16_t m_type = 0;

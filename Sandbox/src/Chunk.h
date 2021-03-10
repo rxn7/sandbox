@@ -23,7 +23,7 @@ public:
 	void createMesh();
 
 	/// <summary> Adds the tex coords to the buffer. </summary>
-	void addTexture(const glm::vec2& texPos);
+	void addTexture(uint16_t texID);
 	
 	/// <summary> Draws the mesh. </summary>
 	void draw(Shader& shader, const Camera& camera);

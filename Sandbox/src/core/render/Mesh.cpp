@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include <vector>
 #include "../Libs.h"
+#include "../../Definitions.h"
 
 Mesh::Mesh() {
 	m_vao = 0;
@@ -22,7 +23,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::draw(const Camera& camera, Shader& shader) {
-	if (glm::distance(camera.getPosition(), m_transform.getPos()) > 100) {
+	if (glm::distance(camera.getPosition(), m_transform.getPos()) > 160) {
 		return;
 	}
 

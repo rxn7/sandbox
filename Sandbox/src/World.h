@@ -15,6 +15,9 @@ public:
 	/// <summary> Calls draw() on all the chunks. </summary>
 	void draw(Shader& shader, const Camera& camera);
 	
+	/// <summary> Returns block type at specified position. </summary>
+	uint8_t getBlock(glm::ivec3 pos);
+
 public:
 	std::vector<Chunk*> m_chunks;
 };

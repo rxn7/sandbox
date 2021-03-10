@@ -15,7 +15,7 @@ void Chunk::generateTerrain() {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
 			int y = rand() & 10 + 5;
-			uint16_t blockType = rand() % 7;
+			uint16_t blockType = rand() % 8;
 			m_map[x][y][z].setType(blockType);
 		}
 	}
@@ -32,8 +32,7 @@ void Chunk::update() {
 }
 
 void Chunk::draw(Shader& shader, const Camera& camera) {
-	if (mp_mesh != nullptr)
-		mp_mesh->draw(camera, shader);
+	if (mp_mesh != nullptr) mp_mesh->draw(camera, shader);
 }
 
 BlockType Chunk::getVoxel(const glm::i16vec3& pos) {
@@ -77,6 +76,8 @@ void Chunk::updateMeshData(const glm::i16vec3& pos) {
 			for (int i = 0; i<4; i++) {	/* Each face has 4 vertices */
 				m_vertices.push_back(pos + VERTICES[TRIANGLES[f][i]]);
 			}
+			
+			addTexture(block.getTextureID(f));
 
 			m_triangles.push_back(m_vertexIndex);
 			m_triangles.push_back(m_vertexIndex+1);
@@ -84,8 +85,6 @@ void Chunk::updateMeshData(const glm::i16vec3& pos) {
 			m_triangles.push_back(m_vertexIndex+2);
 			m_triangles.push_back(m_vertexIndex+1);
 			m_triangles.push_back(m_vertexIndex+3);
-
-			addTexture(block.getTextureCoord(f));
 
 			m_vertexIndex += 4;
 		}
@@ -103,12 +102,17 @@ void Chunk::createMesh() {
 	mp_mesh->getTransform()->setPos(glm::vec3(m_coord.x * CHUNK_WIDTH, 0, m_coord.y * CHUNK_WIDTH));
 }
 
-void Chunk::addTexture(const glm::vec2& texPos) {
-	float x = texPos.x / ATLAS_COLUMNS;
-	float y = texPos.y / ATLAS_ROWS;
+void Chunk::addTexture(uint16_t texID) {
+	double y = texID / ATLAS_SIZE;
+	double x = texID - (y * ATLAS_SIZE);
 	
-	m_texCoords.push_back(glm::vec2(x, y - TEX_HEIGHT));
+	x *= TEX_SIZE;
+	y *= TEX_SIZE;
+
+	y = 1.f - y - TEX_SIZE;
+
 	m_texCoords.push_back(glm::vec2(x, y));
-	m_texCoords.push_back(glm::vec2(x + TEX_WIDTH, y - TEX_HEIGHT));
-	m_texCoords.push_back(glm::vec2(x + TEX_WIDTH, y));
+	m_texCoords.push_back(glm::vec2(x, y + TEX_SIZE));
+	m_texCoords.push_back(glm::vec2(x + TEX_SIZE, y));
+	m_texCoords.push_back(glm::vec2(x + TEX_SIZE, y + TEX_SIZE));
 }

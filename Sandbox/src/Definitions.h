@@ -1,15 +1,13 @@
 #pragma once
 
-#define ATLAS_COLUMNS 3
-#define ATLAS_ROWS 2
+#define ATLAS_SIZE 3
 
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 16
 
 #define VIEW_DISTANCE 8
 
-const static float TEX_WIDTH = 1.f / (float)ATLAS_COLUMNS;
-const static float TEX_HEIGHT = 1.f / (float)ATLAS_ROWS;
+const static float TEX_SIZE = 1.f / (float)ATLAS_SIZE;
 
 static const glm::i16vec3 VERTICES[8] = {
 	glm::i16vec3(0, 0, 0),
