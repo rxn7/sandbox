@@ -5,7 +5,7 @@
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 64
 
-#define VIEW_DISTANCE 8
+#define VIEW_DISTANCE 10
 
 #define RAYCAST_PRECISION 0.1f
 #define INTERACT_RANGE 16

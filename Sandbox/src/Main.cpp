@@ -138,13 +138,10 @@ void drawImGui() {
 			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
 				if (ImGui::Selectable("Default")) {
 					delete p_shader;
-					p_shader = new Shader("res/shaders/defaultShader");
-				} else if (ImGui::Selectable("Transparent")) {
+					p_shader = new Shader("res/shaders/default");
+				} else if (ImGui::Selectable("No Fog")) {
 					delete p_shader;
-					p_shader = new Shader("res/shaders/transparentShader");
-				} else if (ImGui::Selectable("Inverted colors")) {
-					delete p_shader;
-					p_shader = new Shader("res/shaders/invertedShader");
+					p_shader = new Shader("res/shaders/noFog");
 				}
 				ImGui::EndCombo();
 			}
@@ -184,9 +181,9 @@ void windowSizeCallback(GLFWwindow* window, int w, int h) {
 	width = w;
 	height = h;
 
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, std::max(600, w), std::max(600, h));
 
-	p_player->getCamera().setAspect((float)w / (float)h);
+	p_player->getCamera().setAspect((float)std::max(600, w) / (float)std::max(600, h));
 }
 
 void mouseCallback(GLFWwindow* window, double x, double y) {
@@ -257,7 +254,7 @@ bool init() {
 	}
 
 	p_player = new Player(Camera(START_POS, 90, (float)width/(float)height, 0.3f, 1000));
-	p_shader = new Shader("res/shaders/defaultShader");;
+	p_shader = new Shader("res/shaders/default");;
 	p_tex	 = new Texture(texturePacks[0]);
 	p_world	 = new World(p_player->getCamera());
 	p_tex->bind(); 
@@ -271,7 +268,7 @@ bool initGlfw() {
 		return false;
 	}
 	
-	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /* glfwGetPrimaryMonitor() */ NULL, NULL);
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", glfwGetPrimaryMonitor()/* NULL*/, NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
@@ -313,7 +310,7 @@ bool initGl() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glClearColor(0, 160/255, 1.0, 1.0);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 	glLoadIdentity();
 	glViewport(0, 0, WIDTH, HEIGHT);
