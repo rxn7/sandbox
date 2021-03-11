@@ -2,7 +2,7 @@
 
 Open source Minecraft-like voxel sandbox game.
 This was made for fun and for practicing c++ and opengl.
-The code is probably dogshit because I started learning c++ 3 days before starting this project. !**The game may lag for the first 10/20 seconds of runtime**!
+The code is probably dogshit because I started learning c++ 3 days before starting this project. !**You shouldn't go further than 100000 blocks in each direction.**!
 
 ## Installation
 You can download the launcher or you can compile the game yourself.
