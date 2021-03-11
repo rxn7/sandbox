@@ -173,6 +173,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\core\imgui\imgui.cpp" />
     <ClCompile Include="src\core\imgui\imgui_demo.cpp" />
@@ -182,7 +183,7 @@
     <ClCompile Include="src\core\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\core\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\core\Input.cpp" />
-    <ClCompile Include="src\BlocksContainer.cpp" />
+    <ClCompile Include="src\BlocksContainer.h" />
     <ClCompile Include="src\BlockType.cpp" />
     <ClCompile Include="src\Block.cpp" />
     <ClCompile Include="src\core\render\Camera.cpp" />
@@ -194,6 +195,9 @@
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\Math.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\core\ChunkCoord.h" />
     <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\core\imgui\imconfig.h" />

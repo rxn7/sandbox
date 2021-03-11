@@ -23,13 +23,9 @@ Mesh::~Mesh() {
 	glDeleteBuffers(1, &m_vbo);
 }
 
-void Mesh::draw(const Camera& camera, Shader& shader) {
-	if (glm::distance(camera.getPosition(), m_transform.getPos()) > VIEW_DISTANCE * CHUNK_WIDTH) {
-		return;
-	}
-
-	shader.update(m_transform, camera);
+void Mesh::draw(const Camera& camera, Shader& shader, const ChunkCoord& coord) {
 	shader.bind();
+	shader.update(coord, camera);
 
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
@@ -37,7 +33,7 @@ void Mesh::draw(const Camera& camera, Shader& shader) {
 }
 
 void Mesh::setupMesh() {
-	glGenBuffers(1, &m_vao);
+	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
 	glGenBuffers(1, &m_ebo);
 

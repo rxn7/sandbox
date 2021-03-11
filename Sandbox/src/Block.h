@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BlockType.h"
-#include "BlocksContainer.cpp"
+#include "BlocksContainer.h"
 
 struct Block {
 public:
@@ -12,10 +12,10 @@ public:
 	void setType(uint16_t type);
 	
 	/// <summary> Returns getType().solid(). </summary>
-	inline bool solid() { return getType().solid(); }
+	inline bool solid() { return getType()->solid(); }
 
 	/// <summary> Returns BLOCK_TYPES[m_type] </summary>
-	inline BlockType getType() { return Blocks::BLOCK_TYPES[m_type]; }
+	inline BlockType* getType() { return Blocks::BLOCK_TYPES.at(m_type); }
 	
 	/// <summary> Returns the m_type. </summary>
 	inline uint16_t getTypeID() { return m_type; }

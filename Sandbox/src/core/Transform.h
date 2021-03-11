@@ -15,7 +15,6 @@ public:
 		glm::mat4 rotMatrixY = glm::rotate(m_rot.y, glm::vec3(0, 1, 0));
 		glm::mat4 rotMatrixZ = glm::rotate(m_rot.z, glm::vec3(0, 0, 1));
 		glm::mat4 scaleMatrix = glm::scale(m_scale);
-		
 		glm::mat4 rotMatrix = rotMatrixZ * rotMatrixY * rotMatrixX;
 		
 		return posMatrix * rotMatrix * scaleMatrix;

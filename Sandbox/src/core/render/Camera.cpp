@@ -3,53 +3,66 @@
 #include "glm/gtx/rotate_vector.hpp"
 
 Camera::Camera(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar) {
-	m_fov = fov;
-	m_zNear = zNear;
-	m_zFar = zFar;
+	setPosition(pos);
+	setPerspectiveMatrix(fov, aspect, zNear, zFar);
 
-	m_perspective = glm::perspective(fov, aspect, zNear, zFar);
-	m_position = pos;
 	m_forward = glm::vec3(0, 0, -1);
 	m_up = glm::vec3(0, 1, 0);
-
-	update();
 }
 
-void Camera::setPos(const glm::vec3& pos) {
+void Camera::setPosition(const glm::vec3& pos) {
 	m_position = pos;
-	update();
+	recalculateViewMatrix();
 }
 
 void Camera::move(const glm::vec3& dir){
 	m_position += dir;
-	update();
+	recalculateViewMatrix();
 }
 
-void Camera::update() {
-	m_viewProj = m_perspective * glm::lookAt(m_position, m_position + m_forward, m_up);
+void Camera::recalculateViewMatrix() {
+	m_viewMatrix = glm::lookAt(m_position, m_position + m_forward, m_up);
 }
 
-void Camera::recalculatePerspective(int width, int height) {
-	m_perspective = glm::perspective(glm::radians(m_fov), (float)width/(float)height, m_zNear, m_zFar);
+void Camera::recalculateProjectionMatrix() {
+	m_projMatrix = glm::perspective(glm::radians(m_fov), m_aspect, m_zNear, m_zFar);
 }
 
-void Camera::rotate(float x, float y) {
-	if (x == 0 && y == 0) return;
+void Camera::setAspect(float aspect) {
+	m_aspect = aspect;
 
-	m_yaw += x;
-	m_pitch += y;
+	recalculateProjectionMatrix();
+}
 
-	/*Limiting the rotation*/
-	if (m_pitch > 89.95f)			m_pitch = 89.95f;
-	else if (m_pitch < -89.95f)		m_pitch = -89.95f;
-	if (m_yaw > 360)				m_yaw -= 360;
-	else if (m_yaw < -360)			m_yaw += 360;
+void Camera::setPerspectiveMatrix(float fov, float aspect, float zNear, float zFar) {
+	m_fov = fov;
+	m_aspect = aspect;
+	m_zNear = zNear;
+	m_zFar = zFar;
+
+	recalculateProjectionMatrix();
+}
+
+void Camera::onMouseMovement(double xOffset, double yOffset) {
+	m_pitch += yOffset;
+	m_yaw += xOffset;
+	
+	if (m_pitch > 89.0f) m_pitch = 89.0f;
+	if (m_pitch < -89.0f) m_pitch = -89.0f;
 
 	glm::vec3 forward;
-	forward.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+	forward.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
 	forward.y = sin(glm::radians(m_pitch));
-	forward.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-	m_forward = glm::normalize(forward);
+	forward.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
+	setForward(forward);
+}
 
-	update();
+void Camera::setForward(const glm::highp_vec3& forward) {
+	m_forward = forward;
+	recalculateViewMatrix();
+}
+
+void Camera::setFov(float fov) {
+	m_fov = fov;
+	recalculateProjectionMatrix();
 }

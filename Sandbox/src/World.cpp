@@ -1,5 +1,6 @@
 #include "World.h"
 #include <iostream>
+#include "glm/gtc/noise.hpp"
 
 World::World(const Camera& camera) {
 	checkViewDistance(camera, true);
@@ -15,19 +16,6 @@ void World::draw(Shader& shader, const Camera& camera) {
 	for (auto& c : m_chunks) {
 		c.second->draw(shader, camera);
 	}
-}
-
-uint16_t World::generateBlock(glm::ivec3 pos) {
-	if (pos.y == 0) return TYPE_BEDROCK;
-	
-	uint16_t typeValue=0;
-	
-	if (pos.y == CHUNK_HEIGHT-1)								  typeValue = TYPE_GRASS;
-	else if (pos.y < CHUNK_HEIGHT-1 && pos.y > CHUNK_HEIGHT-3)    typeValue = TYPE_DIRT;
-	else if (pos.y <= CHUNK_HEIGHT -3)						      typeValue = TYPE_STONE;
-	else if (pos.y > CHUNK_HEIGHT) return TYPE_AIR;				
-
-	return typeValue;
 }
 
 Chunk* World::requestChunk(ChunkCoord coord, bool create) {
@@ -63,9 +51,9 @@ void World::checkViewDistance(const Camera& camera, bool force) {
 		for (int y = camCord.y - VIEW_DISTANCE; y < camCord.y + VIEW_DISTANCE; y++) {
 			ChunkCoord c(x,y);
 			/* If there is no chunk at this coord, create new one. */
-			if (!m_chunks.count(c)) {
+			if (m_chunks.count(c) == 0) {
 				m_chunks.insert({c, new Chunk(*this, c)});
-			}
+			} 
 
 			/* Don't remove this chunk. */
 			for (int i = 0; i<chunksToRemove.size(); i++) {
@@ -77,8 +65,7 @@ void World::checkViewDistance(const Camera& camera, bool force) {
 	}
 
 	/* Remove each chunk from m_chunks that is in chunksToRemove vector. */
-	/* TODO: Memory leak */
-	for (auto c : chunksToRemove) {
+	for (auto& c : chunksToRemove) {
 		delete m_chunks[c];
 		m_chunks.erase(c);
 	}

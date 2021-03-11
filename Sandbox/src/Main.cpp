@@ -14,12 +14,15 @@
 #include "core/imgui/imgui_impl_glfw.h"
 #include "core/imgui/imgui_impl_opengl3.h"
 
-#include "BlocksContainer.cpp"
+#include "BlocksContainer.h"
 #include "Block.h"
 #include "BlockType.h"
 #include "Main.h"
 #include "Chunk.h"
 #include "World.h"
+#include "Player.h"
+
+#define START_POS glm::vec3(0, 20, 0)
 
 #define HEIGHT 1080
 #define WIDTH 1920
@@ -28,7 +31,7 @@
 
 int width = WIDTH, height = HEIGHT;
 
-bool showGui = true, showDebug = true, showCursor = false;
+bool showGui = true, showDebug = true, showCursor = false, keepFlying = false;
 
 float moveSpeed = 10;
 float dt;
@@ -38,7 +41,7 @@ ImGuiContext* p_imguiContext;
 GLFWwindow* p_window;
 Shader* p_shader;
 Shader* p_crosshairShader;
-Camera* p_camera;
+Player* p_player;
 World* p_world;
 Texture* p_tex;
 
@@ -72,33 +75,34 @@ int main() {
 }
 
 void draw() {
-	p_world->draw(*p_shader, *p_camera);
-		
-	glm::vec3 pos = p_camera->getPosition();
-	glm::vec3 forw = p_camera->getForward();
-
+	p_world->draw(*p_shader, p_player->getCamera());
 	drawImGui(); 
 }
 
 void update() {
 	glfwSetInputMode(p_window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-
+	
 	glm::vec3 moveDir(0, 0, 0);
-	glm::vec3 forward = glm::normalize(glm::vec3(p_camera->getForward().x, 0, p_camera->getForward().z));
+	glm::vec3 forward = glm::normalize(glm::vec3(p_player->getCamera().getForward().x, 0, p_player->getCamera().getForward().z));
 	glm::vec3 up = glm::vec3(0,1,0);
-	if (Input::getKey(GLFW_KEY_W)) moveDir += forward;
+	glm::vec3 left = p_player->getCamera().getLeft();
+
+	if (Input::getKey(GLFW_KEY_W) || keepFlying) moveDir += forward;
 	if (Input::getKey(GLFW_KEY_S)) moveDir -= forward;
-	if (Input::getKey(GLFW_KEY_A)) moveDir += p_camera->getLeft();
-	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
+	if (Input::getKey(GLFW_KEY_A)) moveDir += left;
+	if (Input::getKey(GLFW_KEY_D)) moveDir -= left;
 	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
 	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= up;
 	
-	/* Camera::move recalculates the view projection so call it only if needed. */
-	if (moveDir != glm::vec3()) {
-		p_camera->move(moveDir * dt * moveSpeed);
+	if(glm::length(moveDir) > 0){
+		p_player->setTargetVelocity(glm::normalize(moveDir) * moveSpeed * dt);
+	} else {
+		p_player->setTargetVelocity(glm::vec3(0));
 	}
-
-	p_world->checkViewDistance(*p_camera);
+	
+	p_player->update(dt);
+	
+	p_world->checkViewDistance(p_player->getCamera());
 }
 
 void drawImGui() {
@@ -120,20 +124,16 @@ void drawImGui() {
 				ImGui::Text("Chunk count: %u", p_world->m_chunks.size());
 			}
 
-			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
-			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_camera->getForward().x, p_camera->getForward().y, p_camera->getForward().z);
-			ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
+			ImGui::Text("Player pos: x:%f, y:%f, z:%f", p_player->getPosition().x, p_player->getPosition().y, p_player->getPosition().z);
+			ImGui::Text("Vel: x:%f, y:%f, z:%f", p_player->getVeloctiy().x, p_player->getVeloctiy().y, p_player->getVeloctiy().z);
+			ImGui::Text("Trgt vel: x:%f, y:%f, z:%f", p_player->getTargetVelocity().x, p_player->getTargetVelocity().y, p_player->getTargetVelocity().z);
+			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_player->getCamera().getForward().x, p_player->getCamera().getForward().y, p_player->getCamera().getForward().z);
 		}
 
 		/* Settings */
 		if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 100, "%.0f", 1);
-			/* Camera FOV */
-			if (ImGui::SliderFloat("Camera Fov", &p_camera->m_fov, 1, 179, "%.0f", 1)) {
-				p_camera->recalculatePerspective(width, height);
-				p_camera->update();
-			}
-
+			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 10000, "%.0f", 1);
+			
 			/* Shaders */
 			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
 				if (ImGui::Selectable("Default")) {
@@ -185,7 +185,8 @@ void windowSizeCallback(GLFWwindow* window, int w, int h) {
 	height = h;
 
 	glViewport(0, 0, w, h);
-	p_camera->recalculatePerspective(w, h);
+
+	p_player->getCamera().setAspect((float)w / (float)h);
 }
 
 void mouseCallback(GLFWwindow* window, double x, double y) {
@@ -200,8 +201,8 @@ void mouseCallback(GLFWwindow* window, double x, double y) {
 
 	xOffset *= SENSITIVITY;
 	yOffset *= SENSITIVITY;
-
-	p_camera->rotate(xOffset, yOffset);
+	
+	p_player->getCamera().onMouseMovement(xOffset, yOffset);
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -219,6 +220,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 		case GLFW_KEY_F1:
 			showGui = !showGui;
+			break;
+
+		case GLFW_KEY_F2:
+			keepFlying = !keepFlying;
+			break;
+		
+		case GLFW_KEY_R:
+			p_player->getCamera().setPosition(START_POS);
+			break;
+
+		case GLFW_KEY_K:
 			break;
 		}
 	} else if (action == GLFW_RELEASE) {
@@ -244,11 +256,11 @@ bool init() {
 		return false;
 	}
 
+	p_player = new Player(Camera(START_POS, 90, (float)width/(float)height, 0.3f, 1000));
 	p_shader = new Shader("res/shaders/defaultShader");;
-	p_camera = new Camera(glm::vec3(0, 20, -5), 90, (float)WIDTH/(float)HEIGHT, 0.1f, 1000.0f);
 	p_tex	 = new Texture(texturePacks[0]);
-	p_world	 = new World(*p_camera);
-	p_tex->bind();
+	p_world	 = new World(p_player->getCamera());
+	p_tex->bind(); 
 
 	return true;
 }
@@ -292,8 +304,6 @@ bool initGl() {
 		return false;
 	}
 
-	glLineWidth(5);
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -303,11 +313,11 @@ bool initGl() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glClearColor(0, 140/255, 1.0, 1.0);
+	glClearColor(0, 160/255, 1.0, 1.0);
 
+	glLoadIdentity();
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 
 	return true;
 }
@@ -338,6 +348,8 @@ void clear() {
 
 	delete p_shader;
 	delete p_tex;
-	delete p_camera;
+	delete p_player;
 	delete p_world;
+
+	Blocks::clearArray();
 }

@@ -4,6 +4,7 @@
 #include "../Libs.h"
 #include "../Transform.h"
 #include "Camera.h"
+#include "../ChunkCoord.h"
 
 class Shader {
 public:
@@ -16,13 +17,16 @@ public:
 	void bind();
 
 	/// <summary> Updates the transform uniform in shader. </summary>
-	void update(const Transform& transform, const Camera& camera);
+	void update(const ChunkCoord& coord, const Camera& camera);
 
 private:
 	static const unsigned int NUM_SHADERS = 2;
 
 	enum {
-		TRANSFORM_U,
+		VIEW_U,
+		PROJ_U,
+		COORD_X,
+		COORD_Z,
 		NUM_UNIFORMS
 	};
 

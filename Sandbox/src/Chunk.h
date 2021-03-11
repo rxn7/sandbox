@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include "core/Libs.h"
 #include "core/render/Mesh.h"
@@ -7,39 +8,6 @@
 #include "Definitions.h"
 
 class World;
-
-struct ChunkCoord {
-	int x, y;
-
-	ChunkCoord(int x, int y) {
-		this->x = x;
-		this->y = y;
-	}
-
-	ChunkCoord() {
-		x = 0;
-		y = 0;
-	}
-
-	static ChunkCoord getFromVec3(glm::vec3 pos) {
-		int x = floor(pos.x) / CHUNK_WIDTH;
-		int y = floor(pos.z) / CHUNK_WIDTH;
-		
-		return ChunkCoord(x, y);
-	}
-
-	bool operator==(const ChunkCoord& other) const {
-		return (x == other.x && y == other.y);
-	}
-};
-
-namespace std {
-	template<> struct hash<ChunkCoord> {
-		std::size_t operator()(ChunkCoord const& c) const noexcept {
-			return std::hash<size_t>{}(c.x + c.y);
-		}
-	};
-}
 
 class Chunk {
 public:
@@ -63,13 +31,15 @@ public:
 	void draw(Shader& shader, const Camera& camera);
 	
 	/// <summary> Returns BlockType of block at the specified pos. </summary>
-	BlockType getVoxel(const glm::i16vec3& pos);
+	BlockType* getVoxel(const glm::i16vec3& pos);
 
 	/// <summary> Returns id of block at the specified pos. </summary>
 	uint16_t getVoxelID(const glm::i16vec3& pos);
 
 	/// <summary> Returns the m_coord. </summary>
 	inline ChunkCoord getChunkCoord() const { return m_coord; }
+
+	void generateHeightMap();
 
 private:
 	/// <summary> Generates terrain. </summary>
@@ -78,14 +48,18 @@ private:
 	/// <summary> Clears the mesh buffer data. </summary>
 	void clearMeshData();
 
+	/// <summary> Returns if this block is translucent / should its neighbours be rendered. </summary>
+	bool renderFace(const glm::i8vec3& pos);
+
 public:
 	Block m_map[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+	Mesh* mp_mesh;
 
 private:
 	World* mp_world;
-	Mesh* mp_mesh;
 	ChunkCoord m_coord;
 
+	int m_heightMap[CHUNK_WIDTH][CHUNK_WIDTH];
 	std::vector<glm::vec3> m_vertices;
 	std::vector<GLuint> m_triangles;
 	std::vector<glm::vec2> m_texCoords;
