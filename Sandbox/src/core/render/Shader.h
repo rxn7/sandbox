@@ -2,7 +2,6 @@
 
 #include <string>
 #include "../Libs.h"
-#include "../Transform.h"
 #include "Camera.h"
 #include "../ChunkCoord.h"
 

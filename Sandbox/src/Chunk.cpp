@@ -1,9 +1,10 @@
+#include "core/Math.h"
 #include "World.h"
 #include "Definitions.h"
 #include "BlocksContainer.h"
 #include "core/render/Shader.h"
 #include <iostream>
-#include "glm/gtc/noise.hpp"
+#include "Structures.h"
 
 Chunk::Chunk(World& world, ChunkCoord coord) {
 	mp_world = &world;
@@ -22,15 +23,21 @@ Chunk::~Chunk() {
 void Chunk::generateTerrain() {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
-			int y = m_heightMap[x][z];
-			m_map[x][y][z].setType(TYPE_GRASS);
+			int height = m_heightMap[x][z];
+			m_map[x][height][z].setType(TYPE_GRASS);
 
+			int y = height;
 			y--;
 			for (; y>0; y--) {
 				m_map[x][y][z].setType(TYPE_DIRT);
 			}
 
 			m_map[x][0][z].setType(TYPE_BEDROCK);
+
+			// TODO: Use simplex noise.
+			if (rand() % 1000 == 69) {
+				Structures::genTree(this, x,height,z);
+			}
 		}
 	}
 }
@@ -49,7 +56,7 @@ void Chunk::draw(Shader& shader, const Camera& camera) {
 	mp_mesh->draw(camera, shader, m_coord);
 }
 
-BlockType* Chunk::getVoxel(const glm::i16vec3& pos) {
+BlockType* Chunk::getBlock(const glm::i16vec3& pos) {
 	if (pos.x < 0 || pos.x > CHUNK_WIDTH-1 ||
 		pos.y < 0 || pos.y > CHUNK_HEIGHT-1 ||
 		pos.z < 0 || pos.z > CHUNK_WIDTH-1) {
@@ -59,7 +66,7 @@ BlockType* Chunk::getVoxel(const glm::i16vec3& pos) {
 	return m_map[pos.x][pos.y][pos.z].getType();
 }
 
-uint16_t Chunk::getVoxelID(const glm::i16vec3& pos) {
+uint16_t Chunk::getBlockID(const glm::i16vec3& pos) {
 	if (pos.x < 0 || pos.x >= CHUNK_WIDTH ||
 		pos.y < 0 || pos.y >= CHUNK_HEIGHT ||
 		pos.z < 0 || pos.z >= CHUNK_WIDTH) {
@@ -81,11 +88,9 @@ bool Chunk::renderFace(const glm::i8vec3& pos) {
 		return true;
 	}
 
-	/* TODO: Optimize this. */
+	/* TODO: Get block from neighbour chunks. */
 	if (pos.x < 0 || pos.x >= CHUNK_WIDTH || pos.z < 0 || pos.z >= CHUNK_WIDTH) {
-		/*uint16_t t = mp_world->generateBlock(pos);
-		return Blocks::BLOCK_TYPES[t]->renderNeighbours();*/
-
+		//return mp_world->getBlock(getGlobalPos(pos))->renderNeighbours();
 		return true;
 	}
 
@@ -93,7 +98,7 @@ bool Chunk::renderFace(const glm::i8vec3& pos) {
 }
 
 void Chunk::updateMeshData(const glm::i16vec3& pos) {
-	if (getVoxelID(pos) == TYPE_AIR) return;
+	if (getBlockID(pos) == TYPE_AIR) return;
 	
 	for (uint8_t f = 0; f<6; f++) { /* Each block has 6 faces */
 		if (renderFace(pos + FACES[f])) {
@@ -148,17 +153,34 @@ void Chunk::generateHeightMap() {
 			int blockX = x + m_coord.x * CHUNK_WIDTH;
 			int blockZ = z + m_coord.y * CHUNK_WIDTH;
 
-			
-			/* Get noise value. */
-			float value = glm::simplex(glm::vec2(blockX / 32.0f, blockZ / 32.0f));
+			// Get the noise value. 
+			glm::vec2 pos(blockX * 0.02f, blockZ * 0.02f);
+			float value = glm::simplex(pos);
 
-			/* Make the height to be between 0.0 and 1.0. */
+			// Make the height to be between 0.0 and 1.0. 
 			value = (value+1)/2;
 
-			/* Make it bigger. */
-			value *= 16 + 16;
+			// Make it bigger. 
+			value *= 25;
+			value += 60;
 
+			//float value = Math::sumOctave(6, blockX, blockZ, 0.6f, 0.02f, 16, 30);
 			m_heightMap[x][z] = static_cast<int>(value);
 		}
 	}
+}
+
+uint16_t Chunk::getBlockFromGlobalPos(const glm::ivec3& pos) {
+	int x = pos.x;
+	int y = pos.y;
+	int z = pos.z;
+
+	x -= m_coord.x * CHUNK_WIDTH;
+	z -= m_coord.y * CHUNK_WIDTH;
+
+	if (x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH || y < 0 || y > CHUNK_HEIGHT) {
+		return TYPE_AIR;
+	}
+
+	return m_map[x][y][z].getTypeID();
 }

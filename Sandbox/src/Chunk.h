@@ -31,13 +31,19 @@ public:
 	void draw(Shader& shader, const Camera& camera);
 	
 	/// <summary> Returns BlockType of block at the specified pos. </summary>
-	BlockType* getVoxel(const glm::i16vec3& pos);
+	BlockType* getBlock(const glm::i16vec3& pos);
+
+	uint16_t getBlockFromGlobalPos(const glm::ivec3& pos);
 
 	/// <summary> Returns id of block at the specified pos. </summary>
-	uint16_t getVoxelID(const glm::i16vec3& pos);
+	uint16_t getBlockID(const glm::i16vec3& pos);
 
 	/// <summary> Returns the m_coord. </summary>
 	inline ChunkCoord getChunkCoord() const { return m_coord; }
+
+	inline glm::ivec3 getGlobalPos(const glm::i16vec3& pos) const {
+		return glm::ivec3(pos.x + m_coord.x * CHUNK_WIDTH, pos.y, pos.z + m_coord.y * CHUNK_WIDTH);
+	}
 
 	void generateHeightMap();
 

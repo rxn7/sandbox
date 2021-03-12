@@ -2,7 +2,6 @@
 
 #include "../Libs.h"
 #include "Shader.h"
-#include "../Transform.h"
 #include <vector>
 
 struct ChunkCoord;

@@ -1,6 +1,5 @@
 #pragma once
 #include "core/render/Camera.h"
-#include "glm/gtx/compatibility.hpp"
 
 #define MAX_SPEED = 100
 #define DRAG = 30

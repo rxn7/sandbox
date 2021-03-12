@@ -1,5 +1,4 @@
 #include "Player.h"
-#include "core/Math.h"
 
 Player::Player(const Camera camera) {
 	mp_camera = new Camera(camera.getPosition(), camera.getFov(), camera.getAspect(), camera.getZnear(), camera.getZfar());

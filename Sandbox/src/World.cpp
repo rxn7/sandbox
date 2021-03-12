@@ -31,7 +31,6 @@ Chunk* World::requestChunk(ChunkCoord coord, bool create) {
 	}
 }
 
-/* TODO: !Optimize this! */
 void World::checkViewDistance(const Camera& camera, bool force) {
 	ChunkCoord camCord = ChunkCoord::getFromVec3(camera.getPosition());
 	
@@ -69,4 +68,14 @@ void World::checkViewDistance(const Camera& camera, bool force) {
 		delete m_chunks[c];
 		m_chunks.erase(c);
 	}
+}
+
+/*TODO:*/
+BlockType* World::getBlock(const glm::vec3 pos) {
+	ChunkCoord coord(pos.x / (CHUNK_WIDTH), pos.z / (CHUNK_WIDTH));
+	Chunk* chunk = requestChunk(coord);
+
+	if (!chunk) { return TYPE_AIR; }
+	
+	return Blocks::BLOCK_TYPES[chunk->getBlockFromGlobalPos(pos)];
 }

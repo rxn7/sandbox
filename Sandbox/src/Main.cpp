@@ -8,7 +8,6 @@
 #include "core/render/Shader.h"
 #include "core/render/Mesh.h"
 #include "core/render/Texture.h"
-#include "core/Transform.h"
 #include "core/Input.h"
 #include "core/imgui/imgui.h"
 #include "core/imgui/imgui_impl_glfw.h"
@@ -40,7 +39,6 @@ double lastMouseX = 0, lastMouseY = 0;
 ImGuiContext* p_imguiContext;
 GLFWwindow* p_window;
 Shader* p_shader;
-Shader* p_crosshairShader;
 Player* p_player;
 World* p_world;
 Texture* p_tex;
@@ -132,7 +130,7 @@ void drawImGui() {
 
 		/* Settings */
 		if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 10000, "%.0f", 1);
+			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 100, "%.0f", 1);
 			
 			/* Shaders */
 			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
@@ -172,7 +170,7 @@ void drawImGui() {
 /* TODO: Make an actual shader for this and not do it in ImGui. */
 void drawCrosshair() {
 	ImDrawList* drawList = ImGui::GetForegroundDrawList();
-	ImVec2 offset(width/2, height/2);
+	ImVec2 offset(static_cast<float>(width)/2, static_cast<float>(height)/2);
 	drawList->AddLine(ImVec2(offset.x-15, offset.y), ImVec2(offset.x+15, offset.y), IM_COL32(255,255,255,255), 4);
 	drawList->AddLine(ImVec2(offset.x, offset.y-15), ImVec2(offset.x, offset.y+15), IM_COL32(255,255,255,255), 4);
 }
@@ -268,7 +266,7 @@ bool initGlfw() {
 		return false;
 	}
 	
-	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", glfwGetPrimaryMonitor()/* NULL*/, NULL);
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/  NULL, NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
@@ -310,7 +308,7 @@ bool initGl() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(0.69f, 0.878f, 0.902f, 1.0f);
 
 	glLoadIdentity();
 	glViewport(0, 0, WIDTH, HEIGHT);

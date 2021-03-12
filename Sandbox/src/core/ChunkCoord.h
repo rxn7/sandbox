@@ -16,8 +16,8 @@ struct ChunkCoord {
 	}
 
 	static ChunkCoord getFromVec3(glm::vec3 pos) {
-		int x = floor(pos.x) / CHUNK_WIDTH;
-		int y = floor(pos.z) / CHUNK_WIDTH;
+		int x = static_cast<int>(floor(pos.x)) / CHUNK_WIDTH;
+		int y = static_cast<int>(floor(pos.z)) / CHUNK_WIDTH;
 
 		return ChunkCoord(x, y);
 	}

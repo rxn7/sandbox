@@ -18,6 +18,8 @@ public:
 	/// <summary> Deletes/creates new chunks if neeedd. </summary>
 	void checkViewDistance(const Camera& camera, bool force=false);
 
+	BlockType* getBlock(const glm::vec3 pos);
+
 public:
 	std::unordered_map<ChunkCoord, Chunk*> m_chunks;
 

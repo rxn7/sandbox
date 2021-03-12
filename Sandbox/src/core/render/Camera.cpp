@@ -4,10 +4,10 @@
 
 Camera::Camera(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar) {
 	setPosition(pos);
-	setPerspectiveMatrix(fov, aspect, zNear, zFar);
-
-	m_forward = glm::vec3(0, 0, -1);
+	setForward(glm::vec3(0, 0, -1));
 	m_up = glm::vec3(0, 1, 0);
+	
+	setPerspectiveMatrix(fov, aspect, zNear, zFar);
 }
 
 void Camera::setPosition(const glm::vec3& pos) {

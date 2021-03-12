@@ -3,7 +3,7 @@
 #define CHUNK_SIZE 16
 
 const float FOG_DENSITY = 0.015;
-const float FOG_GRADIENT = 1.5;
+const float FOG_GRADIENT = 1.2;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 texCoord;

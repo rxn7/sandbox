@@ -191,7 +191,6 @@
     <ClCompile Include="src\core\render\Shader.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\core\render\Texture.cpp" />
-    <ClCompile Include="src\core\Transform.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -218,7 +217,7 @@
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\core\stb_image.h" />
     <ClInclude Include="src\core\render\Texture.h" />
-    <ClInclude Include="src\core\Transform.h" />
+    <ClInclude Include="src\Structures.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
