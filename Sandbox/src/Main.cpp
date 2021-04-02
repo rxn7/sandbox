@@ -8,18 +8,20 @@
 #include "core/render/Shader.h"
 #include "core/render/Mesh.h"
 #include "core/render/Texture.h"
-#include "core/Transform.h"
 #include "core/Input.h"
 #include "core/imgui/imgui.h"
 #include "core/imgui/imgui_impl_glfw.h"
 #include "core/imgui/imgui_impl_opengl3.h"
 
-#include "BlocksContainer.cpp"
+#include "BlocksContainer.h"
 #include "Block.h"
 #include "BlockType.h"
 #include "Main.h"
 #include "Chunk.h"
 #include "World.h"
+#include "Player.h"
+
+#define START_POS glm::vec3(0, 80, 0)
 
 #define HEIGHT 1080
 #define WIDTH 1920
@@ -28,7 +30,7 @@
 
 int width = WIDTH, height = HEIGHT;
 
-bool showDebug = true, showCursor = false;
+bool showGui = true, showDebug = true, showCursor = false, keepFlying = false;
 
 float moveSpeed = 10;
 float dt;
@@ -37,7 +39,7 @@ double lastMouseX = 0, lastMouseY = 0;
 ImGuiContext* p_imguiContext;
 GLFWwindow* p_window;
 Shader* p_shader;
-Camera* p_camera;
+Player* p_player;
 World* p_world;
 Texture* p_tex;
 
@@ -50,7 +52,7 @@ int main() {
 	}
 
 	float now = 0, lastFrame = 0;
-	/*Main loop*/
+	/*Main loop */
 	while (!glfwWindowShouldClose(p_window)) {
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -60,88 +62,91 @@ int main() {
 		
 		glfwSwapBuffers(p_window);
 
-		/* Calculate delta between frames*/
+		/* Calculate delta between frames. */
 		now = (float)glfwGetTime();
 		dt = now - lastFrame;
 		lastFrame = now; 
 	}
-
+	
 	clear();
 	return 0;
 }
 
 void draw() {
-	p_world->draw(*p_shader, *p_camera);
-	drawImGui();
+	p_world->draw(*p_shader, p_player->getCamera());
+	drawImGui(); 
 }
 
 void update() {
 	glfwSetInputMode(p_window, GLFW_CURSOR, showCursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-
+	
 	glm::vec3 moveDir(0, 0, 0);
-	glm::vec3 forward = glm::normalize(glm::vec3(p_camera->getForward().x, 0, p_camera->getForward().z));
+	glm::vec3 forward = glm::normalize(glm::vec3(p_player->getCamera().getForward().x, 0, p_player->getCamera().getForward().z));
 	glm::vec3 up = glm::vec3(0,1,0);
-	if (Input::getKey(GLFW_KEY_W)) moveDir += forward;
+	glm::vec3 left = p_player->getCamera().getLeft();
+
+	if (Input::getKey(GLFW_KEY_W) || keepFlying) moveDir += forward;
 	if (Input::getKey(GLFW_KEY_S)) moveDir -= forward;
-	if (Input::getKey(GLFW_KEY_A)) moveDir += p_camera->getLeft();
-	if (Input::getKey(GLFW_KEY_D)) moveDir += p_camera->getRight();
+	if (Input::getKey(GLFW_KEY_A)) moveDir += left;
+	if (Input::getKey(GLFW_KEY_D)) moveDir -= left;
 	if (Input::getKey(GLFW_KEY_SPACE)) moveDir += glm::vec3(0, 1, 0);
 	if (Input::getKey(GLFW_KEY_LEFT_SHIFT)) moveDir -= up;
-
-	if (moveDir != glm::vec3()) {
-		p_camera->move(moveDir * dt * moveSpeed);
+	
+	if(glm::length(moveDir) > 0){
+		p_player->setTargetVelocity(glm::normalize(moveDir) * moveSpeed * dt);
+	} else {
+		p_player->setTargetVelocity(glm::vec3(0));
 	}
+	
+	p_player->update(dt);
+	
+	p_world->update();
+	p_world->checkViewDistance(p_player->getCamera());
 }
 
 void drawImGui() {
+	if (!showGui) return;
+
+	/* Start new frame */
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	/*Debug*/
+	/* Debug */
 	if (showDebug) {
 		ImGui::Begin("Debug");
-		/*Stats*/
+		/* Stats */
 		if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Text("Fps: %.4g", 1.0f/dt);
 				ImGui::Text("Frame delta: %f", dt);
+				ImGui::Text("Chunk count: %u", p_world->m_chunks.size());
 			}
 
-			ImGui::Text("Camera pos: x:%.4g, y:%.4g, z:%.4g", p_camera->getPosition().x, p_camera->getPosition().y, p_camera->getPosition().z);
-			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_camera->getForward().x, p_camera->getForward().y, p_camera->getForward().z);
-			ImGui::Text("Yaw: %.4g, Pitch:%.4g", p_camera->m_yaw, p_camera->m_pitch);
+			ImGui::Text("Player pos: x:%f, y:%f, z:%f", p_player->getPosition().x, p_player->getPosition().y, p_player->getPosition().z);
+			ImGui::Text("Vel: x:%f, y:%f, z:%f", p_player->getVeloctiy().x, p_player->getVeloctiy().y, p_player->getVeloctiy().z);
+			ImGui::Text("Trgt vel: x:%f, y:%f, z:%f", p_player->getTargetVelocity().x, p_player->getTargetVelocity().y, p_player->getTargetVelocity().z);
+			ImGui::Text("Camera forward: x:%.4g, y:%.4g, z:%.4g", p_player->getCamera().getForward().x, p_player->getCamera().getForward().y, p_player->getCamera().getForward().z);
 		}
 
-		/*Settings*/
+		/* Settings */
 		if (ImGui::CollapsingHeader("Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::SliderFloat("Move Speed", &moveSpeed, 1, 100, "%.0f", 1);
-			/*Camera FOV*/
-			if (ImGui::SliderFloat("Camera Fov", &p_camera->m_fov, 1, 179, "%.0f", 1)) {
-				p_camera->recalculatePerspective(width, height);
-				p_camera->update();
-			}
-
-			/*Shaders*/
+			
+			/* Shaders */
 			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
 				if (ImGui::Selectable("Default")) {
+					p_shader = new Shader("res/shaders/default");
+				} else if (ImGui::Selectable("No Fog")) {
 					delete p_shader;
-					p_shader = new Shader("res/shaders/defaultShader");
-				}
-				else if (ImGui::Selectable("Transparent")) {
-					delete p_shader;
-					p_shader = new Shader("res/shaders/transparentShader");
-				}
-				else if (ImGui::Selectable("Inverted colors")) {
-					delete p_shader;
-					p_shader = new Shader("res/shaders/invertedShader");
+					p_shader = new Shader("res/shaders/noFog");
 				}
 				ImGui::EndCombo();
 			}
 
-			/*Texture Packs*/
+			/* Texture Packs */
 			if (ImGui::BeginCombo("Texture", "Choose Texture")) {
-				for (unsigned int i = 0; i<texturePacks.size(); i++) {
+				for (uint8_t i = 0; i<texturePacks.size(); i++) {
 					std::string name = texturePacks[i].substr(texturePacks[i].find_last_of("/\\") + 1);
 					if (ImGui::Selectable(name.c_str())) {
 						delete p_tex;
@@ -152,31 +157,31 @@ void drawImGui() {
 				ImGui::EndCombo();
 			}
 		}
-		
-		/*Generate World*/
-		if (ImGui::Button("Generate World")) {
-			/*Delete all generated chunks before genereting new ones*/
-			for (int i = 0; i<p_world->m_chunks.size(); i++) {
-				delete p_world->m_chunks[i];
-			}
-
-			p_world->m_chunks.clear();
-			p_world->generate();
-		}
-
 		ImGui::End();
 	}
 
+	drawCrosshair();
+
+	/* Render */
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+/* TODO: Make an actual shader for this and not do it in ImGui. */
+void drawCrosshair() {
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+	ImVec2 offset(static_cast<float>(width)/2, static_cast<float>(height)/2);
+	drawList->AddLine(ImVec2(offset.x-15, offset.y), ImVec2(offset.x+15, offset.y), IM_COL32(255,255,255,255), 4);
+	drawList->AddLine(ImVec2(offset.x, offset.y-15), ImVec2(offset.x, offset.y+15), IM_COL32(255,255,255,255), 4);
 }
 
 void windowSizeCallback(GLFWwindow* window, int w, int h) {
 	width = w;
 	height = h;
 
-	glViewport(0, 0, w, h);
-	p_camera->recalculatePerspective(w, h);
+	glViewport(0, 0, std::max(600, w), std::max(600, h));
+
+	p_player->getCamera().setAspect((float)std::max(600, w) / (float)std::max(600, h));
 }
 
 void mouseCallback(GLFWwindow* window, double x, double y) {
@@ -191,8 +196,8 @@ void mouseCallback(GLFWwindow* window, double x, double y) {
 
 	xOffset *= SENSITIVITY;
 	yOffset *= SENSITIVITY;
-
-	p_camera->rotate(xOffset, yOffset);
+	
+	p_player->getCamera().onMouseMovement(xOffset, yOffset);
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -207,10 +212,28 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case GLFW_KEY_TAB:
 			showDebug = !showDebug;
 			break;
+
+		case GLFW_KEY_F1:
+			showGui = !showGui;
+			break;
+
+		case GLFW_KEY_F2:
+			keepFlying = !keepFlying;
+			break;
+		
+		case GLFW_KEY_R:
+			p_player->getCamera().setPosition(START_POS);
+			break;
+
+		case GLFW_KEY_K:
+			break;
 		}
 	} else if (action == GLFW_RELEASE) {
 		Input::setKey(key, false);
 	}
+}
+
+void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 bool init() {
@@ -228,11 +251,11 @@ bool init() {
 		return false;
 	}
 
-	p_shader = new Shader("res/shaders/defaultShader");;
-	p_camera = new Camera(glm::vec3(0, 20, -5), 90, (float)WIDTH/(float)HEIGHT, 0.1f, 100.0f);
+	p_player = new Player(Camera(START_POS, 90, (float)width/(float)height, 0.3f, 1000));
+	p_shader = new Shader("res/shaders/default");;
 	p_tex	 = new Texture(texturePacks[0]);
-	p_world	 = new World();
-	p_tex->bind();
+	p_world	 = new World(p_player->getCamera());
+	p_tex->bind(); 
 
 	return true;
 }
@@ -243,7 +266,7 @@ bool initGlfw() {
 		return false;
 	}
 	
-	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/ NULL, NULL);
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/  NULL, NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
@@ -251,8 +274,9 @@ bool initGlfw() {
 
 	glewExperimental = true;
 
+	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); /* Use only OpenGL core */
 	
 	glfwMakeContextCurrent(p_window);
 	
@@ -260,6 +284,7 @@ bool initGlfw() {
 	glfwGetCursorPos(p_window, &lastMouseX, &lastMouseY);
 	glfwMaximizeWindow(p_window);
 	
+	glfwSetMouseButtonCallback(p_window, mouseBtnCallback);
 	glfwSetCursorPosCallback(p_window, mouseCallback);
 	glfwSetWindowSizeCallback(p_window, windowSizeCallback);
 	glfwSetKeyCallback(p_window, keyCallback);
@@ -281,13 +306,13 @@ bool initGl() {
 	glCullFace(GL_BACK);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LESS);
 
-	glClearColor(0.53f, 0.8f, 0.92f, 1);
+	glClearColor(0.69f, 0.878f, 0.902f, 1.0f);
 
+	glLoadIdentity();
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 
 	return true;
 }
@@ -318,7 +343,8 @@ void clear() {
 
 	delete p_shader;
 	delete p_tex;
-	delete p_camera;
+	delete p_player;
 	delete p_world;
-	delete p_imguiContext;
+
+	Blocks::clearArray();
 }

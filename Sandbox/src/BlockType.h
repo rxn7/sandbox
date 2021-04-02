@@ -5,7 +5,7 @@
 
 class BlockType {
 public:
-	BlockType(const std::string name, const bool isSolid, const glm::vec2& top=glm::vec2(), const glm::vec2& bot = glm::vec2(), const glm::vec2& left = glm::vec2(), const glm::vec2& right = glm::vec2(), const glm::vec2& front = glm::vec2(), const glm::vec2& back = glm::vec2());
+	BlockType(const std::string name, const bool isSolid, const uint16_t top=0, const uint16_t bot = 0, const uint16_t left = 0, uint16_t right = 0, const uint16_t front = 0, const uint16_t back = 0);
 
 public:
 	/// <summary> Returns the m_name. </summary>
@@ -22,11 +22,11 @@ private:
 	bool m_solid;
 
 public:
-	glm::vec2 m_topTex;
-	glm::vec2 m_bottomTex;
-	glm::vec2 m_leftTex;
-	glm::vec2 m_rightTex;
-	glm::vec2 m_frontTex;
-	glm::vec2 m_backTex;
+	uint16_t m_topTex=0;
+	uint16_t m_bottomTex=0;
+	uint16_t m_leftTex=0;
+	uint16_t m_rightTex=0;
+	uint16_t m_frontTex=0;
+	uint16_t m_backTex=0;
 };
 

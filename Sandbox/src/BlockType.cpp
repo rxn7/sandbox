@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Definitions.h"
 
-BlockType::BlockType(const std::string name, const bool isSolid, const glm::vec2& top, const glm::vec2& bot, const glm::vec2& left, const glm::vec2& right, const glm::vec2& front, const glm::vec2& back){
+BlockType::BlockType(const std::string name, const bool isSolid, const uint16_t top, const uint16_t bot, const uint16_t left, const uint16_t right, const uint16_t front, const uint16_t back){
 	m_name = name;
 	m_solid = isSolid;
 

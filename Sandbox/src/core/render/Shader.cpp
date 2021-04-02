@@ -2,8 +2,8 @@
 #include "Shader.h"
 #include <fstream>
 #include <iostream>
-#include "../Transform.h"
 #include "Camera.h"
+#include <glm/gtc/type_ptr.hpp>
 
 static void checkShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
 static std::string loadShader(const std::string& fileName);
@@ -11,9 +11,9 @@ static GLuint createShader(const std::string& rawText, GLenum shaderType);
 
 Shader::Shader() {
 	m_program = 0;
-
+	
 	m_shaders[0] = 0;
-	m_shaders[1] = 1;
+	m_shaders[1] = 0;
 }
 
 Shader::Shader(const std::string& fileName) {
@@ -35,7 +35,10 @@ Shader::Shader(const std::string& fileName) {
 	glValidateProgram(m_program);
 	checkShaderError(m_program, GL_VALIDATE_STATUS, true, "Program is invalid");
 
-	m_uniforms[TRANSFORM_U] = glGetUniformLocation(m_program, "transform");
+	m_uniforms[VIEW_U] = glGetUniformLocation(m_program, "viewMatrix");
+	m_uniforms[PROJ_U] = glGetUniformLocation(m_program, "projectionMatrix");
+	m_uniforms[COORD_X] = glGetUniformLocation(m_program, "coordX");
+	m_uniforms[COORD_Z] = glGetUniformLocation(m_program, "coordZ");
 }
 
 Shader::~Shader() {
@@ -51,9 +54,13 @@ void Shader::bind() {
 	glUseProgram(m_program);
 }
 
-void Shader::update(const Transform& transform, const Camera& camera) {
-	glm::mat4 matrix = camera.getViewProjection() * transform.getMatrix();
-	glUniformMatrix4fv(m_uniforms[TRANSFORM_U], 1, GL_FALSE, &matrix[0][0]);
+void Shader::update(const ChunkCoord& coord, const Camera& camera) {
+	glm::mat4 projMat = camera.getProjMatrix();
+	glm::mat4 viewMat = camera.getViewMatrix();
+	glUniformMatrix4fv(m_uniforms[VIEW_U], 1, GL_FALSE, glm::value_ptr(viewMat));
+	glUniformMatrix4fv(m_uniforms[PROJ_U], 1, GL_FALSE, glm::value_ptr(projMat));
+	glUniform1i(m_uniforms[COORD_X], coord.x);
+	glUniform1i(m_uniforms[COORD_Z], coord.y);
 }
 
 static GLuint createShader(const std::string& rawText, GLenum shaderType) {

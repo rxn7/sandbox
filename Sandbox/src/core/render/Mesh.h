@@ -2,8 +2,9 @@
 
 #include "../Libs.h"
 #include "Shader.h"
-#include "../Transform.h"
 #include <vector>
+
+struct ChunkCoord;
 
 struct Vertex {
 public:
@@ -29,10 +30,7 @@ public:
 
 public:
 	/// <summary> Binds the specified shader and draws the elements. </summary>
-	void draw(const Camera& camera, Shader& shader);
-
-	/// <summary> Returns pointer to m_transform. </summary>
-	inline Transform* getTransform() { return &m_transform; }
+	void draw(const Camera& camera, Shader& shader, const ChunkCoord& coord);
 
 private:
 	/// <summary> Generates buffers and sets vertex attrib pointers. </summary>
@@ -43,7 +41,5 @@ public:
 	std::vector<GLuint> m_indices;
 	
 private:
-	Transform m_transform;
-
 	GLuint m_vao, m_vbo, m_ebo;
 };

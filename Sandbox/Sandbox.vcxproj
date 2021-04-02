@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\bin\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)\bin-int\$(Configuration)-$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -87,8 +87,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\bin\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)\bin-int\$(Configuration)-$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -173,6 +173,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\core\imgui\imgui.cpp" />
     <ClCompile Include="src\core\imgui\imgui_demo.cpp" />
@@ -182,7 +183,7 @@
     <ClCompile Include="src\core\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\core\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\core\Input.cpp" />
-    <ClCompile Include="src\BlocksContainer.cpp" />
+    <ClCompile Include="src\BlocksContainer.h" />
     <ClCompile Include="src\BlockType.cpp" />
     <ClCompile Include="src\Block.cpp" />
     <ClCompile Include="src\core\render\Camera.cpp" />
@@ -190,11 +191,12 @@
     <ClCompile Include="src\core\render\Shader.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\core\render\Texture.cpp" />
-    <ClCompile Include="src\core\Transform.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ChunkCoord.h" />
+    <ClInclude Include="src\core\Math.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\core\ChunkCoord.h" />
     <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\core\imgui\imconfig.h" />
@@ -215,7 +217,7 @@
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\core\stb_image.h" />
     <ClInclude Include="src\core\render\Texture.h" />
-    <ClInclude Include="src\core\Transform.h" />
+    <ClInclude Include="src\Structures.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
