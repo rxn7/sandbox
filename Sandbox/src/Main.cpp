@@ -21,7 +21,7 @@
 #include "World.h"
 #include "Player.h"
 
-#define START_POS glm::vec3(0, 20, 0)
+#define START_POS glm::vec3(0, 80, 0)
 
 #define HEIGHT 1080
 #define WIDTH 1920
@@ -100,6 +100,7 @@ void update() {
 	
 	p_player->update(dt);
 	
+	p_world->update();
 	p_world->checkViewDistance(p_player->getCamera());
 }
 
@@ -135,7 +136,6 @@ void drawImGui() {
 			/* Shaders */
 			if (ImGui::BeginCombo("Shader", "Choose Shader")) {
 				if (ImGui::Selectable("Default")) {
-					delete p_shader;
 					p_shader = new Shader("res/shaders/default");
 				} else if (ImGui::Selectable("No Fog")) {
 					delete p_shader;
@@ -306,7 +306,7 @@ bool initGl() {
 	glCullFace(GL_BACK);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LESS);
 
 	glClearColor(0.69f, 0.878f, 0.902f, 1.0f);
 

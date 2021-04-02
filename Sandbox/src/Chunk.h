@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <memory>
 #include <vector>
 #include "core/Libs.h"
@@ -33,19 +34,26 @@ public:
 	/// <summary> Returns BlockType of block at the specified pos. </summary>
 	BlockType* getBlock(const glm::i16vec3& pos);
 
+	/// <summary> Returns type of block at the specified GLOBAL pos. </summary>
 	uint16_t getBlockFromGlobalPos(const glm::ivec3& pos);
 
 	/// <summary> Returns id of block at the specified pos. </summary>
 	uint16_t getBlockID(const glm::i16vec3& pos);
 
 	/// <summary> Returns the m_coord. </summary>
-	inline ChunkCoord getChunkCoord() const { return m_coord; }
+	ChunkCoord getChunkCoord() const;
 
-	inline glm::ivec3 getGlobalPos(const glm::i16vec3& pos) const {
-		return glm::ivec3(pos.x + m_coord.x * CHUNK_WIDTH, pos.y, pos.z + m_coord.y * CHUNK_WIDTH);
-	}
-
+	/// <summary> Returns global position of the specified local position.</summary>
+	glm::ivec3 getGlobalPos(const glm::i16vec3& pos) const;
+	
+	/// <summary Generates height map using simplex noise. </summary>
 	void generateHeightMap();
+	
+	/// <summary> Returns true if chunk needs updating. </summary>
+	bool needUpdate() const;
+	
+	/// <summary> Returns true if chunk needs to create the mesh. </summary>
+	bool needCreateMesh() const;
 
 private:
 	/// <summary> Generates terrain. </summary>
@@ -62,6 +70,8 @@ public:
 	Mesh* mp_mesh;
 
 private:
+	bool m_createMesh;
+	bool m_update;
 	World* mp_world;
 	ChunkCoord m_coord;
 

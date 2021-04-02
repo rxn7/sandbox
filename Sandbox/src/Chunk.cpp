@@ -6,14 +6,11 @@
 #include <iostream>
 #include "Structures.h"
 
-Chunk::Chunk(World& world, ChunkCoord coord) {
-	mp_world = &world;
-	m_coord = coord;
-
+Chunk::Chunk(World& world, ChunkCoord coord) 
+: mp_world(&world), m_coord(coord), m_update(false), m_createMesh(false){
 	generateHeightMap();
 	generateTerrain();
-	update();
-	createMesh();
+	m_update = true;
 }
 
 Chunk::~Chunk() {
@@ -25,24 +22,23 @@ void Chunk::generateTerrain() {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
 			int height = m_heightMap[x][z];
 			m_map[x][height][z].setType(TYPE_GRASS);
-
+			
 			int y = height;
 			y--;
 			for (; y>0; y--) {
 				m_map[x][y][z].setType(TYPE_DIRT);
 			}
-
+			
 			m_map[x][0][z].setType(TYPE_BEDROCK);
-
-			// TODO: Use simplex noise.
-			if (rand() % 1000 == 69) {
-				Structures::genTree(this, x,height,z);
-			}
 		}
 	}
 }
 
 void Chunk::update() {
+	m_update = false;
+
+	clearMeshData();
+	
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int y = 0; y<CHUNK_HEIGHT; y++) {
 			for (int z = 0; z<CHUNK_WIDTH; z++) {
@@ -50,10 +46,14 @@ void Chunk::update() {
 			}
 		}
 	}
+
+	m_createMesh = true;
 }
 
 void Chunk::draw(Shader& shader, const Camera& camera) {
-	mp_mesh->draw(camera, shader, m_coord);
+	if (mp_mesh) {
+		mp_mesh->draw(camera, shader, m_coord);
+	}
 }
 
 BlockType* Chunk::getBlock(const glm::i16vec3& pos) {
@@ -123,8 +123,11 @@ void Chunk::updateMeshData(const glm::i16vec3& pos) {
 }
 
 void Chunk::createMesh() {
-	std::vector<Vertex> vertices;
+	m_createMesh = false;
+	delete mp_mesh;
 
+	std::vector<Vertex> vertices;
+	
 	for (size_t i = 0; i<m_vertices.size(); i++) {
 		vertices.push_back(Vertex(m_vertices[i], m_texCoords[i]));
 	}
@@ -183,4 +186,20 @@ uint16_t Chunk::getBlockFromGlobalPos(const glm::ivec3& pos) {
 	}
 
 	return m_map[x][y][z].getTypeID();
+}
+
+ChunkCoord Chunk::getChunkCoord() const {
+	return m_coord;
+}
+
+glm::ivec3 Chunk::getGlobalPos(const glm::i16vec3& pos) const {
+	return glm::ivec3(pos.x+m_coord.x*CHUNK_WIDTH, pos.y, pos.z+m_coord.y*CHUNK_WIDTH);
+}
+
+bool Chunk::needUpdate() const {
+	return m_update;
+}
+
+bool Chunk::needCreateMesh() const {
+	return m_createMesh;
 }

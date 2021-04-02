@@ -1,12 +1,15 @@
-#include "World.h"
 #include <iostream>
+#include "World.h"
 #include "glm/gtc/noise.hpp"
 
-World::World(const Camera& camera) {
+World::World(const Camera& camera) 
+: m_chunksUpdateThread(&World::updateChunks, this) {
 	checkViewDistance(camera, true);
 }
 
 World::~World(){
+	m_chunksUpdateThread.join();
+	
 	for (auto& c : m_chunks) {
 		delete c.second;
 	}
@@ -18,15 +21,38 @@ void World::draw(Shader& shader, const Camera& camera) {
 	}
 }
 
+void World::update() {
+	for (auto& chunk : m_chunks) {
+		if (chunk.second->needCreateMesh()) {
+			chunk.second->createMesh();
+		}
+	}
+}
+
+void World::updateChunks() {
+	// This is on other thread so while(true) won't lock up the main thread.
+	while (true) {
+		for (auto& chunk : m_chunks) {
+			if (chunk.second->needUpdate()) {
+				chunk.second->update();
+			}
+		}
+	}
+}
+
 Chunk* World::requestChunk(ChunkCoord coord, bool create) {
 	if (m_chunks.count(coord)) {
 		return m_chunks[coord];
 	} else {
+		// If chunk doesn't exist and user doesn't want to create it - return nullptr.
 		if (!create) {
 			return nullptr;
-		} else {
-			m_chunks[coord] = new Chunk(*this, coord);
-			return m_chunks[coord];
+		} 
+		// If chunk doesn't exist and user wants to create it - create new one.
+		else {
+			Chunk* c = new Chunk(*this, coord);
+			m_chunks[coord] = c;
+			return c;
 		}
 	}
 }
@@ -34,11 +60,11 @@ Chunk* World::requestChunk(ChunkCoord coord, bool create) {
 void World::checkViewDistance(const Camera& camera, bool force) {
 	ChunkCoord camCord = ChunkCoord::getFromVec3(camera.getPosition());
 	
-	if (camCord == lastCamCoord && !force) {
-		lastCamCoord = camCord;
+	if (camCord == m_lastCamCoord && !force) {
+		m_lastCamCoord = camCord;
 		return;
 	}
-	lastCamCoord = camCord;
+	m_lastCamCoord = camCord;
 
 	/* Copy each key from m_chunks to new vector. Then remove from this vector chunks that have to stay. */
 	std::vector<ChunkCoord> chunksToRemove{};

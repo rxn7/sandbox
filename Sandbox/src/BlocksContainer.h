@@ -15,6 +15,7 @@
 #define TYPE_DIORITE 9
 #define TYPE_OBSIDIAN 10
 #define TYPE_OAK_PLANKS 11
+#define TYPE_OAK_LEAVES 12
 
 namespace Blocks {
 	static const std::vector<BlockType*> BLOCK_TYPES = {
@@ -30,6 +31,7 @@ namespace Blocks {
 		new BlockType("Diorite", true, 10, 10, 10, 10, 10, 10),
 		new BlockType("Obsidian", true, 11, 11, 11, 11, 11, 11),
 		new BlockType("Oak Planks", true, 12, 12, 12, 12, 12, 12),
+		new BlockType("Oak Leaves", false, 13, 13, 13, 13, 13, 13),
 	};
 
 	static void clearArray(){
