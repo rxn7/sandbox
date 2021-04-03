@@ -6,7 +6,7 @@
 
 class World {
 public:
-	World(const Camera& camera);
+	World(const Camera& camera, GLFWwindow* p_window);
 	virtual ~World();
 
 public:
@@ -25,14 +25,16 @@ public:
 	BlockType* getBlock(const glm::vec3 pos);
 
 private:
-	/// <summary> Function for m_chunksUpdateThread thread. </summary>
+	/// <summary> NOTE: This is on m_chunksUpdateThread!
+	/// Updates chunks if needed. </summary>
 	void updateChunks();
 
 public:
 	std::unordered_map<ChunkCoord, Chunk*> m_chunks;
 
 private:
-	std::mutex m_chunksListLock;
+	GLFWwindow* mp_window;
+
 	std::thread m_chunksUpdateThread;
 	ChunkCoord m_lastCamCoord;
 };

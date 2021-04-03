@@ -52,7 +52,7 @@ public:
 	/// <summary> Returns true if chunk needs updating. </summary>
 	bool needUpdate() const;
 	
-	/// <summary> Returns true if chunk needs to create the mesh. </summary>
+	/// <summary> Returns true if chunk needs to create mesh. </summary>
 	bool needCreateMesh() const;
 
 private:

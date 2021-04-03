@@ -253,8 +253,8 @@ bool init() {
 
 	p_player = new Player(Camera(START_POS, 90, (float)width/(float)height, 0.3f, 1000));
 	p_shader = new Shader("res/shaders/default");;
-	p_tex	 = new Texture(texturePacks[0]);
-	p_world	 = new World(p_player->getCamera());
+	p_tex = new Texture(texturePacks[0]);
+	p_world = new World(p_player->getCamera(), p_window);
 	p_tex->bind(); 
 
 	return true;
@@ -266,7 +266,7 @@ bool initGlfw() {
 		return false;
 	}
 	
-	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", /*glfwGetPrimaryMonitor()*/  NULL, NULL);
+	p_window = glfwCreateWindow(WIDTH, HEIGHT, "Rotthin's Sandbox", glfwGetPrimaryMonitor(), NULL);
 	if (!p_window) {
 		std::cerr << "Couldn't create the window." << std::endl;
 		return false;
@@ -276,7 +276,7 @@ bool initGlfw() {
 
 	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); /* Use only OpenGL core */
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	glfwMakeContextCurrent(p_window);
 	

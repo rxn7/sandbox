@@ -2,20 +2,23 @@
 #include "World.h"
 #include "glm/gtc/noise.hpp"
 
-World::World(const Camera& camera) 
-: m_chunksUpdateThread(&World::updateChunks, this) {
+World::World(const Camera& camera, GLFWwindow* p_window)
+: mp_window(p_window), m_chunksUpdateThread(&World::updateChunks, this) {
 	checkViewDistance(camera, true);
 }
 
 World::~World(){
+	// Stop the chunks update thread
 	m_chunksUpdateThread.join();
-	
+		
+	// Delete all chunk pointers
 	for (auto& c : m_chunks) {
 		delete c.second;
 	}
 }
 
 void World::draw(Shader& shader, const Camera& camera) {
+	// Draw all chunks
 	for (auto& c : m_chunks) {
 		c.second->draw(shader, camera);
 	}
@@ -31,7 +34,7 @@ void World::update() {
 
 void World::updateChunks() {
 	// This is on other thread so while(true) won't lock up the main thread.
-	while (true) {
+	while (!glfwWindowShouldClose(mp_window)) {
 		for (auto& chunk : m_chunks) {
 			if (chunk.second->needUpdate()) {
 				chunk.second->update();
