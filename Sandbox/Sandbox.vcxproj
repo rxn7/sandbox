@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -173,6 +173,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\core\imgui\imgui.cpp" />
@@ -194,6 +195,7 @@
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\core\Math.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\core\ChunkCoord.h" />
@@ -214,7 +216,6 @@
     <ClInclude Include="src\core\render\Shader.h" />
     <ClInclude Include="src\core\render\Camera.h" />
     <ClInclude Include="src\core\Libs.h" />
-    <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\core\stb_image.h" />
     <ClInclude Include="src\core\render\Texture.h" />
     <ClInclude Include="src\Structures.h" />

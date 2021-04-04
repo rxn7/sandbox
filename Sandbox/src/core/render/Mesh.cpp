@@ -12,7 +12,7 @@ Mesh::Mesh() {
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) {
 	m_vertices = vertices;
 	m_indices = indices;
-	setupMesh();
+	SetupMesh();
 }
 
 Mesh::~Mesh() {
@@ -23,16 +23,16 @@ Mesh::~Mesh() {
 	glDeleteBuffers(1, &m_vbo);
 }
 
-void Mesh::draw(const Camera& camera, Shader& shader, const ChunkCoord& coord) {
-	shader.bind();
-	shader.update(coord, camera);
+void Mesh::Draw(const Camera& camera, Shader& shader, const ChunkCoord& coord) {
+	shader.Bind();
+	shader.Update(coord, camera);
 
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 
-void Mesh::setupMesh() {
+void Mesh::SetupMesh() {
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
 	glGenBuffers(1, &m_ebo);

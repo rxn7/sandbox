@@ -3,8 +3,8 @@
 #include "glm/gtc/noise.hpp"
 
 World::World(const Camera& camera, GLFWwindow* p_window)
-: mp_window(p_window), m_chunksUpdateThread(&World::updateChunks, this) {
-	checkViewDistance(camera, true);
+: mp_window(p_window), m_chunksUpdateThread(&World::UpdateChunks, this) {
+	CheckViewDistance(camera, true);
 }
 
 World::~World(){
@@ -17,33 +17,33 @@ World::~World(){
 	}
 }
 
-void World::draw(Shader& shader, const Camera& camera) {
+void World::Draw(Shader& shader, const Camera& camera) {
 	// Draw all chunks
 	for (auto& c : m_chunks) {
-		c.second->draw(shader, camera);
+		c.second->Draw(shader, camera);
 	}
 }
 
-void World::update() {
+void World::Update() {
 	for (auto& chunk : m_chunks) {
-		if (chunk.second->needCreateMesh()) {
-			chunk.second->createMesh();
+		if (chunk.second->NeedCreateMesh()) {
+			chunk.second->CreateMesh();
 		}
 	}
 }
 
-void World::updateChunks() {
+void World::UpdateChunks() {
 	// This is on other thread so while(true) won't lock up the main thread.
 	while (!glfwWindowShouldClose(mp_window)) {
 		for (auto& chunk : m_chunks) {
-			if (chunk.second->needUpdate()) {
-				chunk.second->update();
+			if (chunk.second->NeedUpdate()) {
+				chunk.second->Update();
 			}
 		}
 	}
 }
 
-Chunk* World::requestChunk(ChunkCoord coord, bool create) {
+Chunk* World::RequestChunk(ChunkCoord coord, bool create) {
 	if (m_chunks.count(coord)) {
 		return m_chunks[coord];
 	} else {
@@ -60,8 +60,8 @@ Chunk* World::requestChunk(ChunkCoord coord, bool create) {
 	}
 }
 
-void World::checkViewDistance(const Camera& camera, bool force) {
-	ChunkCoord camCord = ChunkCoord::getFromVec3(camera.getPosition());
+void World::CheckViewDistance(const Camera& camera, bool force) {
+	ChunkCoord camCord = ChunkCoord::GetFromVec3(camera.GetPosition());
 	
 	if (camCord == m_lastCamCoord && !force) {
 		m_lastCamCoord = camCord;
@@ -100,11 +100,11 @@ void World::checkViewDistance(const Camera& camera, bool force) {
 }
 
 /*TODO:*/
-BlockType* World::getBlock(const glm::vec3 pos) {
+BlockType* World::GetBlock(const glm::vec3 pos) {
 	ChunkCoord coord(pos.x / (CHUNK_WIDTH), pos.z / (CHUNK_WIDTH));
-	Chunk* chunk = requestChunk(coord);
+	Chunk* chunk = RequestChunk(coord);
 
 	if (!chunk) { return TYPE_AIR; }
 	
-	return Blocks::BLOCK_TYPES[chunk->getBlockFromGlobalPos(pos)];
+	return Blocks::BLOCK_TYPES[chunk->GetBlockFromGlobalPos(pos)];
 }

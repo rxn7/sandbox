@@ -8,61 +8,61 @@ public:
 	
 public:
 	/// <summary> Returns normalized cross product of camera's forward and up direction. </summary>
-	inline glm::vec3 getRight() const		    { return glm::normalize(glm::cross(m_forward, m_up)); }
+	glm::vec3 GetRight() const;
 
 	/// <summary> Returns normalized cross product of camera's up and forward direction. </summary>
-	inline glm::vec3 getLeft() const			{ return glm::normalize(glm::cross(m_up, m_forward)); }
+	glm::vec3 GetLeft() const;
 	
-	/// <summary> Returns m_forward. </summary>
-	inline glm::vec3 getForward() const			{ return m_forward; }
+	/// <summary> Returns the forward direction of the camrea. </summary>
+	glm::vec3 GetForward() const;
 	
-	/// <summary> Returns m_position. </summary>
-	inline glm::vec3 getPosition() const		{ return m_position; }
+	/// <summary> Returns the position of the camera. </summary>
+	glm::vec3 GetPosition() const;
 	
-	/// <summary> Returns m_viewProj. </summary>
-	inline glm::mat4 getViewMatrix() const	{ return m_viewMatrix; }
+	/// <summary> Returns view matrix of this camera. </summary>
+	glm::mat4 GetViewMatrix() const;
 
-	/// <summary> Returns m_projMatrix. </summary>
-	inline glm::mat4 getProjMatrix() const { return m_projMatrix; }
+	/// <summary> Returns projection matrix of this camera. </summary>
+	glm::mat4 GetProjectionMatrix() const;
 
-	/// <summary Retruns m_fov. </summary>
-	inline float getFov() const { return m_fov; }
+	/// <summary Retruns the fov of the camera. </summary>
+	float GetFov() const;
 
-	/// <summary> returns m_aspect. </summary>
-	inline float getAspect() const { return m_aspect; }
+	/// <summary> returns the aspect of the camera. </summary>
+	float GetAspect() const;
 
-	/// <summary> returns m_zNear. </summary>
-	inline float getZnear() const { return m_zNear; }
+	/// <summary> returns the zNear of the camera. </summary>
+	float GetZnear() const;
 
-	/// <summary> returns m_zFar. </summary>
-	inline float getZfar() const { return m_zFar; }
+	/// <summary> returns the zFar of the camera. </summary>
+	float GetZfar() const;
 
 	/// <summary> Recalculates camera projection matrix. </summary>
-	void recalculateProjectionMatrix();
+	void RecalculateProjectionMatrix();
 
 	/// <summary> Recalculates camera view matrix. </summary>
-	void recalculateViewMatrix();
+	void RecalculateViewMatrix();
 	
 	/// <summary> Sets camera position to specified value.. </summary>
-	void setPosition(const glm::vec3& pos);
+	void SetPosition(const glm::vec3& pos);
 		
 	/// <summary> Sets m_ratio to specified value. </summary>
-	void setAspect(float aspect);
+	void SetAspect(float aspect);
 
 	/// <summary> Sets m_forward to specified value. </summary>
-	void setForward(const glm::highp_vec3& forward);
+	void SetForward(const glm::highp_vec3& forward);
 
 	/// <summary> Sets m_fov to specified value. </summary>
-	void setFov(float fov);
+	void SetFov(float fov);
 
 	/// <summary> Moves camera by the specified offset. </summary>
-	void move(const glm::vec3& dir);
+	void Move(const glm::vec3& dir);
 
 	/// <summary> Sets m_fov to fov, m_aspect to aspect, m_zNear to zNear, m_zFar to zFar. </summary>
-	void setPerspectiveMatrix(float fov, float aspect, float zNear, float zFar);
+	void SetPerspectiveMatrix(float fov, float aspect, float zNear, float zFar);
 
 	/// <summary> Rotates the camera based on mouse movement. </summary>
-	void onMouseMovement(double xOffset, double yOffset);
+	void OnMouseMovement(double xOffset, double yOffset);
 
 private:
 	glm::mat4 m_projMatrix;

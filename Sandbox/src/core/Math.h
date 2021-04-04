@@ -4,7 +4,7 @@
 #include "glm/gtc/noise.hpp"
 
 namespace Math {
-	float sumOctave(uint8_t numIterations, int x, int z, float persistence, float scale, float low, float high) {
+	float SumOctave(uint8_t numIterations, int x, int z, float persistence, float scale, float low, float high) {
 		float maxAmp = 0;
 		float amp = 1;
 		float freq = scale;

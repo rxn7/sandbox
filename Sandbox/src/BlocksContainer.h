@@ -34,8 +34,8 @@ namespace Blocks {
 		new BlockType("Oak Leaves", false, 13, 13, 13, 13, 13, 13),
 	};
 
-	static void clearArray(){
-		for (auto b : BLOCK_TYPES) {
+	static void ClearBlockTypes() {
+		for (auto b:BLOCK_TYPES) {
 			delete b;
 		}
 	}

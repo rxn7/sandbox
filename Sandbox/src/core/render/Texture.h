@@ -10,10 +10,10 @@ public:
 	
 public:
 	/// <summary> Binds this texture. </summary>
-	void bind();
+	void Bind();
 
-	/// <summary> Returns m_name. </summary>
-	std::string getName() const { return m_name; }
+	/// <summary> Returns the name of the texture. </summary>
+	std::string GetName() const;
 
 private:
 	std::string m_name;

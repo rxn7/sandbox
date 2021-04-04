@@ -8,14 +8,14 @@ public:
 	BlockType(const std::string name, const bool isSolid, const uint16_t top=0, const uint16_t bot = 0, const uint16_t left = 0, uint16_t right = 0, const uint16_t front = 0, const uint16_t back = 0);
 
 public:
-	/// <summary> Returns the m_name. </summary>
-	inline std::string getName() const { return m_name;  }
+	/// <summary> Returns the name of the block type. </summary>
+	std::string GetName() const;
 
-	/// <summary> Returns the !m_solid. </summary>
-	inline bool renderNeighbours() const { return !m_solid; }
+	/// <summary> Returns true if block should render its neighbours. </summary>
+	bool ShouldRenderNeighbours() const;
 
-	/// <summary> Returns the m_solid. </summary>
-	inline bool solid() const { return m_solid; }
+	/// <summary> Returns true if block is solid. </summary>
+	bool IsSolid() const;
 
 private:
 	std::string m_name;

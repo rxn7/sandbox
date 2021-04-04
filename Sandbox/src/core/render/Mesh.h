@@ -30,11 +30,11 @@ public:
 
 public:
 	/// <summary> Binds the specified shader and draws the elements. </summary>
-	void draw(const Camera& camera, Shader& shader, const ChunkCoord& coord);
+	void Draw(const Camera& camera, Shader& shader, const ChunkCoord& coord);
 
 private:
 	/// <summary> Generates buffers and sets vertex attrib pointers. </summary>
-	void setupMesh();
+	void SetupMesh();
 	
 public:
 	std::vector<Vertex> m_vertices;

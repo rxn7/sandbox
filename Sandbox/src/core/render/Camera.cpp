@@ -3,47 +3,47 @@
 #include "glm/gtx/rotate_vector.hpp"
 
 Camera::Camera(const glm::vec3& pos, float fov, float aspect, float zNear, float zFar) {
-	setPosition(pos);
-	setForward(glm::vec3(0, 0, -1));
+	SetPosition(pos);
+	SetForward(glm::vec3(0, 0, -1));
 	m_up = glm::vec3(0, 1, 0);
 	
-	setPerspectiveMatrix(fov, aspect, zNear, zFar);
+	SetPerspectiveMatrix(fov, aspect, zNear, zFar);
 }
 
-void Camera::setPosition(const glm::vec3& pos) {
+void Camera::SetPosition(const glm::vec3& pos) {
 	m_position = pos;
-	recalculateViewMatrix();
+	RecalculateViewMatrix();
 }
 
-void Camera::move(const glm::vec3& dir){
+void Camera::Move(const glm::vec3& dir){
 	m_position += dir;
-	recalculateViewMatrix();
+	RecalculateViewMatrix();
 }
 
-void Camera::recalculateViewMatrix() {
+void Camera::RecalculateViewMatrix() {
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_forward, m_up);
 }
 
-void Camera::recalculateProjectionMatrix() {
+void Camera::RecalculateProjectionMatrix() {
 	m_projMatrix = glm::perspective(glm::radians(m_fov), m_aspect, m_zNear, m_zFar);
 }
 
-void Camera::setAspect(float aspect) {
+void Camera::SetAspect(float aspect) {
 	m_aspect = aspect;
 
-	recalculateProjectionMatrix();
+	RecalculateProjectionMatrix();
 }
 
-void Camera::setPerspectiveMatrix(float fov, float aspect, float zNear, float zFar) {
+void Camera::SetPerspectiveMatrix(float fov, float aspect, float zNear, float zFar) {
 	m_fov = fov;
 	m_aspect = aspect;
 	m_zNear = zNear;
 	m_zFar = zFar;
 
-	recalculateProjectionMatrix();
+	RecalculateProjectionMatrix();
 }
 
-void Camera::onMouseMovement(double xOffset, double yOffset) {
+void Camera::OnMouseMovement(double xOffset, double yOffset) {
 	m_pitch += yOffset;
 	m_yaw += xOffset;
 	
@@ -54,15 +54,55 @@ void Camera::onMouseMovement(double xOffset, double yOffset) {
 	forward.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
 	forward.y = sin(glm::radians(m_pitch));
 	forward.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
-	setForward(forward);
+	SetForward(forward);
 }
 
-void Camera::setForward(const glm::highp_vec3& forward) {
+void Camera::SetForward(const glm::highp_vec3& forward) {
 	m_forward = forward;
-	recalculateViewMatrix();
+	RecalculateViewMatrix();
 }
 
-void Camera::setFov(float fov) {
+void Camera::SetFov(float fov) {
 	m_fov = fov;
-	recalculateProjectionMatrix();
+	RecalculateProjectionMatrix();
+}
+
+float Camera::GetZfar() const {
+	return m_zFar;
+}
+
+float Camera::GetZnear() const {
+	return m_zNear;
+}
+
+float Camera::GetAspect() const {
+	return m_aspect;
+}
+
+float Camera::GetFov() const {
+	return m_fov;
+}
+
+glm::mat4 Camera::GetProjectionMatrix() const {
+	return m_projMatrix;
+}
+
+glm::mat4 Camera::GetViewMatrix() const {
+	return m_viewMatrix;
+}
+
+glm::vec3 Camera::GetPosition() const {
+	return m_position;
+}
+
+glm::vec3 Camera::GetForward() const {
+	return m_forward;
+}
+
+glm::vec3 Camera::GetLeft() const { 
+	return glm::normalize(glm::cross(m_up, m_forward)); 
+}
+
+glm::vec3 Camera::GetRight() const { 
+	return glm::normalize(glm::cross(m_forward, m_up)); 
 }

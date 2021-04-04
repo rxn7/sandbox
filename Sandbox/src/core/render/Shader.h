@@ -13,10 +13,10 @@ public:
 
 public:
 	/// <summary> Binds this shader. </summary>
-	void bind();
+	void Bind();
 
-	/// <summary> Updates the transform uniform in shader. </summary>
-	void update(const ChunkCoord& coord, const Camera& camera);
+	/// <summary> Updates the uniforms in this shader. </summary>
+	void Update(const ChunkCoord& coord, const Camera& camera);
 
 private:
 	static const unsigned int NUM_SHADERS = 2;

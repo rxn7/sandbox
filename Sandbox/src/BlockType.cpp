@@ -13,3 +13,16 @@ BlockType::BlockType(const std::string name, const bool isSolid, const uint16_t 
 	m_frontTex = front;
 	m_backTex = back;
 }
+
+std::string BlockType::GetName() const {
+	return m_name;
+}
+
+bool BlockType::IsSolid() const {
+	return m_solid;
+}
+
+bool BlockType::ShouldRenderNeighbours() const {
+	return !m_solid;
+}
+

@@ -5,9 +5,9 @@
 #include "Camera.h"
 #include <glm/gtc/type_ptr.hpp>
 
-static void checkShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
-static std::string loadShader(const std::string& fileName);
-static GLuint createShader(const std::string& rawText, GLenum shaderType);
+static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
+static std::string LoadShader(const std::string& fileName);
+static GLuint CreateShader(const std::string& rawText, GLenum shaderType);
 
 Shader::Shader() {
 	m_program = 0;
@@ -19,8 +19,8 @@ Shader::Shader() {
 Shader::Shader(const std::string& fileName) {
 	m_program = glCreateProgram();
 	
-	m_shaders[0] = createShader(loadShader(fileName + ".vs"), GL_VERTEX_SHADER);
-	m_shaders[1] = createShader(loadShader(fileName + ".fs"), GL_FRAGMENT_SHADER);
+	m_shaders[0] = CreateShader(LoadShader(fileName + ".vs"), GL_VERTEX_SHADER);
+	m_shaders[1] = CreateShader(LoadShader(fileName + ".fs"), GL_FRAGMENT_SHADER);
 
 	for (GLuint sh : m_shaders) {
 		glAttachShader(m_program, sh);
@@ -30,10 +30,10 @@ Shader::Shader(const std::string& fileName) {
 	glBindAttribLocation(m_program, 1, "texCoord");
 	
 	glLinkProgram(m_program);
-	checkShaderError(m_program, GL_LINK_STATUS, true, "Program linking failed");
+	CheckShaderError(m_program, GL_LINK_STATUS, true, "Program linking failed");
 	
 	glValidateProgram(m_program);
-	checkShaderError(m_program, GL_VALIDATE_STATUS, true, "Program is invalid");
+	CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Program is invalid");
 
 	m_uniforms[VIEW_U] = glGetUniformLocation(m_program, "viewMatrix");
 	m_uniforms[PROJ_U] = glGetUniformLocation(m_program, "projectionMatrix");
@@ -50,20 +50,20 @@ Shader::~Shader() {
 	glDeleteProgram(m_program);
 }
 
-void Shader::bind() {
+void Shader::Bind() {
 	glUseProgram(m_program);
 }
 
-void Shader::update(const ChunkCoord& coord, const Camera& camera) {
-	glm::mat4 projMat = camera.getProjMatrix();
-	glm::mat4 viewMat = camera.getViewMatrix();
+void Shader::Update(const ChunkCoord& coord, const Camera& camera) {
+	glm::mat4 projMat = camera.GetProjectionMatrix();
+	glm::mat4 viewMat = camera.GetViewMatrix();
 	glUniformMatrix4fv(m_uniforms[VIEW_U], 1, GL_FALSE, glm::value_ptr(viewMat));
 	glUniformMatrix4fv(m_uniforms[PROJ_U], 1, GL_FALSE, glm::value_ptr(projMat));
 	glUniform1i(m_uniforms[COORD_X], coord.x);
 	glUniform1i(m_uniforms[COORD_Z], coord.y);
 }
 
-static GLuint createShader(const std::string& rawText, GLenum shaderType) {
+static GLuint CreateShader(const std::string& rawText, GLenum shaderType) {
 	GLuint shader = glCreateShader(shaderType);
 
 	if (shader == 0)
@@ -77,12 +77,12 @@ static GLuint createShader(const std::string& rawText, GLenum shaderType) {
 	glShaderSource(shader, 1, src, lengths);
 	glCompileShader(shader);
 
-	checkShaderError(shader, GL_COMPILE_STATUS, false, "Error compiling shader");
+	CheckShaderError(shader, GL_COMPILE_STATUS, false, "Error compiling shader");
 
 	return shader;
 }
 
-static std::string loadShader(const std::string& fileName) {
+static std::string LoadShader(const std::string& fileName) {
 	std::ifstream file;
 	file.open((fileName).c_str());
 
@@ -103,7 +103,7 @@ static std::string loadShader(const std::string& fileName) {
 	return output;
 }
 
-static void checkShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage) {
+static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage) {
 	GLint result = 0;
 	GLchar error[1024] = {0};
 	

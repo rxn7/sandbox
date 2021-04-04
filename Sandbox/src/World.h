@@ -11,23 +11,23 @@ public:
 
 public:
 	/// <summary> Calls draw() on all the chunks. </summary>
-	void draw(Shader& shader, const Camera& camera);
+	void Draw(Shader& shader, const Camera& camera);
 	
-	void update();
+	void Update();
 
 	/// <summary> Returns chunk at specified coord if exits. Else if create is true it creates new chunk. </summary>
-	Chunk* requestChunk(ChunkCoord coord, bool create = false);
+	Chunk* RequestChunk(ChunkCoord coord, bool create = false);
 
 	/// <summary> Deletes/creates new chunks if neeedd. </summary>
-	void checkViewDistance(const Camera& camera, bool force=false);
+	void CheckViewDistance(const Camera& camera, bool force=false);
 
 	/// <summary> Returns block type at specified pos. </summary>
-	BlockType* getBlock(const glm::vec3 pos);
+	BlockType* GetBlock(const glm::vec3 pos);
 
 private:
 	/// <summary> NOTE: This is on m_chunksUpdateThread!
 	/// Updates chunks if needed. </summary>
-	void updateChunks();
+	void UpdateChunks();
 
 public:
 	std::unordered_map<ChunkCoord, Chunk*> m_chunks;

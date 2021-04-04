@@ -9,19 +9,19 @@ public:
 	Block(uint16_t type);
 public:
 	/// <summary> Set the m_type to the specified value. </summary>
-	void setType(uint16_t type);
+	void SetType(uint16_t type);
 	
 	/// <summary> Returns getType().solid(). </summary>
-	inline bool solid() { return getType()->solid(); }
+	bool IsSolid() const;
 
 	/// <summary> Returns BLOCK_TYPES[m_type] </summary>
-	inline BlockType* getType() { return Blocks::BLOCK_TYPES.at(m_type); }
+	BlockType* GetType() const;
 	
 	/// <summary> Returns the m_type. </summary>
-	inline uint16_t getTypeID() { return m_type; }
+	uint16_t GetTypeID() const;
 	
 	/// <summary> Returns the tex coord of specified face. </summary>
-	uint16_t getTextureID(uint8_t face);
+	uint16_t GetTextureID(uint8_t face) const;
 
 private:
 	uint16_t m_type = 0;

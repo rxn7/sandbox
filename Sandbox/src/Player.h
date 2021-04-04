@@ -10,19 +10,20 @@ public:
 	virtual ~Player();
 
 public:
-	void update(float dt);
+	/// <summary> Calculates the velocity and position. </summary>
+	void Update(float dt);
 
-	inline void resetVelocity() { m_velocity = glm::vec3(0); }
+	void ResetVelocity();
 
-	inline Camera& getCamera() const { return *mp_camera; }
+	Camera& GetCamera() const;
 
-	inline glm::vec3 getPosition() const { return m_position; }
+	glm::vec3 GetPosition() const;
 
-	inline glm::vec3 getVeloctiy() const { return m_velocity; }
+	glm::vec3 GetVeloctiy() const;
 	
-	inline glm::vec3 getTargetVelocity() const { return m_targetVelocity; }
+	glm::vec3 GetTargetVelocity() const;
 
-	inline void setTargetVelocity(const glm::vec3& val) { m_targetVelocity = val; }
+	void SetTargetVelocity(const glm::vec3& val);
 
 private:
 	Camera* mp_camera;

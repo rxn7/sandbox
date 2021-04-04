@@ -25,10 +25,14 @@ Texture::Texture(const std::string& fileName) {
 	stbi_image_free(imgData);
 }
 
-void Texture::bind() {
+Texture::~Texture() {
+	glDeleteTextures(1, &m_texture);
+}
+
+void Texture::Bind() {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }
 
-Texture::~Texture() {
-	glDeleteTextures(1, &m_texture);
+std::string Texture::GetName() const {
+	return m_name;
 }
