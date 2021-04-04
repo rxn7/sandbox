@@ -3,7 +3,7 @@
 #define ATLAS_SIZE 8
 
 #define CHUNK_WIDTH 16
-#define CHUNK_HEIGHT 256
+#define CHUNK_HEIGHT 96
 
 #define VIEW_DISTANCE 10
 

@@ -22,7 +22,12 @@ public:
 	void CheckViewDistance(const Camera& camera, bool force=false);
 
 	/// <summary> Returns block type at specified pos. </summary>
-	BlockType* GetBlock(const glm::vec3 pos);
+	uint16_t GetBlock(int x, int y, int z);
+
+	/// <summary> Returns block type at specified pos. </summary>
+	uint16_t GetBlock(glm::vec3 pos);
+	
+	uint8_t GetHeight(int x, int z);
 
 private:
 	/// <summary> NOTE: This is on m_chunksUpdateThread!

@@ -8,7 +8,6 @@
 
 Chunk::Chunk(World& world, ChunkCoord coord) 
 : mp_world(&world), m_coord(coord), m_update(false), m_createMesh(false){
-	GenerateHeightMap();
 	GenerateTerrain();
 	m_update = true;
 }
@@ -20,7 +19,7 @@ Chunk::~Chunk() {
 void Chunk::GenerateTerrain() {
 	for (int x = 0; x<CHUNK_WIDTH; x++) {
 		for (int z = 0; z<CHUNK_WIDTH; z++) {
-			int height = m_heightMap[x][z];
+			uint8_t height = mp_world->GetHeight(x + m_coord.x * CHUNK_WIDTH, z + m_coord.y * CHUNK_WIDTH);
 			m_map[x][height][z].SetType(TYPE_GRASS);
 			
 			int y = height;
@@ -64,14 +63,14 @@ void Chunk::ClearMeshData() {
 }
 
 bool Chunk::ShouldRenderFace(const glm::i8vec3& pos) {
-	if (pos.y < 0 || pos.y >= CHUNK_HEIGHT) {
+	if (pos.y < 0) {
+		return false;
+	} else if (pos.y>=CHUNK_HEIGHT) {
 		return true;
 	}
 
-	/* TODO: Get block from neighbour chunks. */
 	if (pos.x < 0 || pos.x >= CHUNK_WIDTH || pos.z < 0 || pos.z >= CHUNK_WIDTH) {
-		//return mp_world->getBlock(getGlobalPos(pos))->renderNeighbours();
-		return true;
+		return Blocks::BLOCK_TYPES[mp_world->GetBlock(GetGlobalPos(pos))]->ShouldRenderNeighbours();
 	}
 
 	return m_map[pos.x][pos.y][pos.z].GetType()->ShouldRenderNeighbours();
@@ -130,29 +129,6 @@ void Chunk::AddTexture(uint16_t texID) {
 	m_texCoords.push_back(glm::vec2(x + TEX_SIZE, y + TEX_SIZE));
 }
 
-void Chunk::GenerateHeightMap() {
-	for (uint8_t x = 0; x<CHUNK_WIDTH; x++) {
-		for (uint8_t z = 0; z<CHUNK_WIDTH; z++) {
-			int blockX = x + m_coord.x * CHUNK_WIDTH;
-			int blockZ = z + m_coord.y * CHUNK_WIDTH;
-
-			// Get the noise value. 
-			glm::vec2 pos(blockX * 0.02f, blockZ * 0.02f);
-			float value = glm::simplex(pos);
-
-			// Make the height to be between 0.0 and 1.0. 
-			value = (value+1)/2;
-
-			// Make it bigger. 
-			value *= 25;
-			value += 60;
-
-			//float value = Math::sumOctave(6, blockX, blockZ, 0.6f, 0.02f, 16, 30);
-			m_heightMap[x][z] = static_cast<int>(value);
-		}
-	}
-}
-
 BlockType* Chunk::GetBlock(const glm::i16vec3& pos) const {
 	if (pos.x < 0||pos.x > CHUNK_WIDTH-1||
 		pos.y < 0||pos.y > CHUNK_HEIGHT-1||
@@ -192,8 +168,8 @@ ChunkCoord Chunk::GetChunkCoord() const {
 	return m_coord;
 }
 
-glm::ivec3 Chunk::GetGlobalPos(const glm::i16vec3& pos) const {
-	return glm::ivec3(pos.x+m_coord.x*CHUNK_WIDTH, pos.y, pos.z+m_coord.y*CHUNK_WIDTH);
+glm::vec3 Chunk::GetGlobalPos(const glm::i16vec3& pos) const {
+	return glm::vec3(pos.x+m_coord.x*CHUNK_WIDTH, pos.y, pos.z+m_coord.y*CHUNK_WIDTH);
 }
 
 bool Chunk::NeedUpdate() const {

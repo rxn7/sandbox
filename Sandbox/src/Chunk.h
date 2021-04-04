@@ -44,10 +44,7 @@ public:
 	ChunkCoord GetChunkCoord() const;
 
 	/// <summary> Returns global position of the specified local position.</summary>
-	glm::ivec3 GetGlobalPos(const glm::i16vec3& pos) const;
-	
-	/// <summary Generates height map using simplex noise. </summary>
-	void GenerateHeightMap();
+	glm::vec3 GetGlobalPos(const glm::i16vec3& pos) const;
 	
 	/// <summary> Returns true if chunk needs updating. </summary>
 	bool NeedUpdate() const;
@@ -75,7 +72,6 @@ private:
 	World* mp_world;
 	ChunkCoord m_coord;
 
-	int m_heightMap[CHUNK_WIDTH][CHUNK_WIDTH];
 	std::vector<glm::vec3> m_vertices;
 	std::vector<GLuint> m_triangles;
 	std::vector<glm::vec2> m_texCoords;

@@ -99,12 +99,41 @@ void World::CheckViewDistance(const Camera& camera, bool force) {
 	}
 }
 
-/*TODO:*/
-BlockType* World::GetBlock(const glm::vec3 pos) {
-	ChunkCoord coord(pos.x / (CHUNK_WIDTH), pos.z / (CHUNK_WIDTH));
-	Chunk* chunk = RequestChunk(coord);
+uint16_t World::GetBlock(int x, int y, int z) {
+	if (y==0) { 
+		return TYPE_BEDROCK; 
+	}
 
-	if (!chunk) { return TYPE_AIR; }
-	
-	return Blocks::BLOCK_TYPES[chunk->GetBlockFromGlobalPos(pos)];
+	uint8_t height = GetHeight(x,z);
+
+	if (y==height) {
+		return TYPE_GRASS;
+	} else if (y < height && y > height-4) {
+		return TYPE_DIRT;
+	} else if (y > height){
+		return TYPE_AIR;
+	} else {
+		return TYPE_STONE;
+	}
+
+	return TYPE_AIR;
+}
+
+uint16_t World::GetBlock(glm::vec3 pos) {
+	return GetBlock(pos.x, pos.y, pos.z);
+}
+
+uint8_t World::GetHeight(int x, int z) {
+	// Get the noise value. 
+	glm::vec2 pos(x*0.02f, z*0.02f);
+	float height = glm::simplex(pos);
+
+	// Make the height to be between 0.0 and 1.0. 
+	height = (height+1)/2;
+
+	// Make it bigger. 
+	height *= 25;
+	height += 60;
+
+	return static_cast<uint8_t>(height);
 }
