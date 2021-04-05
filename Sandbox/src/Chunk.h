@@ -72,7 +72,8 @@ private:
 	World* mp_world;
 	ChunkCoord m_coord;
 
-	std::vector<glm::vec3> m_vertices;
+	std::vector<Vertex> m_vertices;
+	std::vector<glm::vec3> m_verticesPositions;
 	std::vector<GLuint> m_triangles;
 	std::vector<glm::vec2> m_texCoords;
 

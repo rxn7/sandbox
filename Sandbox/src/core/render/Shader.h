@@ -7,7 +7,6 @@
 
 class Shader {
 public:
-	Shader();
 	Shader(const std::string& fileName);
 	virtual ~Shader();
 
@@ -29,7 +28,7 @@ private:
 		NUM_UNIFORMS
 	};
 
-	GLuint m_program;
+	GLuint m_program=0;
 	GLuint m_shaders[NUM_SHADERS];
 	GLuint m_uniforms[NUM_UNIFORMS];
 };

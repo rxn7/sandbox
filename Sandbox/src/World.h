@@ -26,7 +26,6 @@ public:
 
 	/// <summary> Returns block type at specified pos. </summary>
 	uint16_t GetBlock(glm::vec3 pos);
-	
 	uint8_t GetHeight(int x, int z);
 
 private:

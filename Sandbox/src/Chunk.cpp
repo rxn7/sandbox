@@ -22,9 +22,7 @@ void Chunk::GenerateTerrain() {
 			uint8_t height = mp_world->GetHeight(x + m_coord.x * CHUNK_WIDTH, z + m_coord.y * CHUNK_WIDTH);
 			m_map[x][height][z].SetType(TYPE_GRASS);
 			
-			int y = height;
-			y--;
-			for (; y>0; y--) {
+			for (uint8_t y=height-1; y>0; y--) {
 				m_map[x][y][z].SetType(TYPE_DIRT);
 			}
 			
@@ -37,13 +35,17 @@ void Chunk::Update() {
 	m_update = false;
 
 	ClearMeshData();
-	
-	for (int x = 0; x<CHUNK_WIDTH; x++) {
-		for (int y = 0; y<CHUNK_HEIGHT; y++) {
-			for (int z = 0; z<CHUNK_WIDTH; z++) {
+	for (uint8_t x = 0; x<CHUNK_WIDTH; x++) {
+		for (uint8_t y = 0; y<CHUNK_HEIGHT; y++) {
+			for (uint8_t z = 0; z<CHUNK_WIDTH; z++) {
 				UpdateMeshData(glm::i16vec3(x, y, z));
 			}
 		}
+	}
+
+	m_vertices.clear();
+	for (size_t i = 0; i<m_verticesPositions.size(); i++) {
+		m_vertices.push_back(Vertex(m_verticesPositions[i], m_texCoords[i]));
 	}
 
 	m_createMesh = true;
@@ -57,22 +59,28 @@ void Chunk::Draw(Shader& shader, const Camera& camera) {
 
 void Chunk::ClearMeshData() {
 	m_vertexIndex = 0;
-	m_vertices.clear();
+	m_verticesPositions.clear();
 	m_triangles.clear();
 	m_texCoords.clear();
 }
 
 bool Chunk::ShouldRenderFace(const glm::i8vec3& pos) {
+	// If block is under the world.
 	if (pos.y < 0) {
 		return false;
-	} else if (pos.y>=CHUNK_HEIGHT) {
+	} 
+
+	// If block is above the world.
+	if (pos.y>=CHUNK_HEIGHT) {
 		return true;
 	}
 
+	// If block is outside the chunk
 	if (pos.x < 0 || pos.x >= CHUNK_WIDTH || pos.z < 0 || pos.z >= CHUNK_WIDTH) {
 		return Blocks::BLOCK_TYPES[mp_world->GetBlock(GetGlobalPos(pos))]->ShouldRenderNeighbours();
 	}
 
+	// If the block is inside the chunk
 	return m_map[pos.x][pos.y][pos.z].GetType()->ShouldRenderNeighbours();
 }
 
@@ -84,7 +92,7 @@ void Chunk::UpdateMeshData(const glm::i16vec3& pos) {
 			Block& block = m_map[pos.x][pos.y][pos.z];
 
 			for (int i = 0; i<4; i++) {	/* Each face has 4 vertices */
-				m_vertices.push_back(pos + VERTICES[TRIANGLES[f][i]]);
+				m_verticesPositions.push_back(pos + VERTICES[TRIANGLES[f][i]]);
 			}
 			
 			AddTexture(block.GetTextureID(f));
@@ -105,13 +113,7 @@ void Chunk::CreateMesh() {
 	m_createMesh = false;
 	delete mp_mesh;
 
-	std::vector<Vertex> vertices;
-	
-	for (size_t i = 0; i<m_vertices.size(); i++) {
-		vertices.push_back(Vertex(m_vertices[i], m_texCoords[i]));
-	}
-
-	mp_mesh = new Mesh(vertices, m_triangles);
+	mp_mesh = new Mesh(m_vertices, m_triangles);
 }
 
 void Chunk::AddTexture(uint16_t texID) {
