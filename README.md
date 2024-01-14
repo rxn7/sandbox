@@ -1,14 +1,10 @@
 # Rotthin's Sandbox
 
 Open source Minecraft-like voxel sandbox game.
-This was made for fun and for practicing c++ and opengl.
-The code is probably dogshit because I started learning c++ 3 days before starting this project. !**You shouldn't go further than 100000 blocks in each direction. Weird things can happen.**!
+The is my 2nd C++ project, it teached me a lot about OpenGL and modern C++.  
 
 ## Installation
 You can download the launcher or you can compile the game yourself.
-<br>
-!**REMEMBER TO UNZIP THE FILE BEFORE RUNNING THE LAUNCHER**!
-(If you don't, crashes can occur).
 
 ## Features
 ### Texture Packs
