@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+SHARED_OPTS="-GNinja -DBUILD_SHARED_LIBS=ON -DIMGUI_WITH_BACKEND=ON -DIMGUI_BACKEND_PLATFORM=GLFW -DIMGUI_BACKEND_OPENGL3=ON"
+
+cmake -Bbuild/debug -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $SHARED_OPTS
+cp build/debug/compile_commands.json .
+
+cmake -Bbuild/release -DCMAKE_BUILD_TYPE=Release $SHARED_OPTS
